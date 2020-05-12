@@ -16,18 +16,17 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
+import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
-import android.opengl.GLES30;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
-import android.app.Activity;
-import android.graphics.SurfaceTexture;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.WindowSurface;
 
 /**
  * Simple demonstration of using GLES to draw on a TextureView.
@@ -119,7 +118,7 @@ public class TextureViewGLActivity extends Activity {
      * happen on the UI thread.
      */
     private static class Renderer extends Thread implements TextureView.SurfaceTextureListener {
-        private Object mLock = new Object();        // guards mSurfaceTexture, mDone
+        private final Object mLock = new Object();        // guards mSurfaceTexture, mDone
         private SurfaceTexture mSurfaceTexture;
         private EglCore mEglCore;
         private boolean mDone;

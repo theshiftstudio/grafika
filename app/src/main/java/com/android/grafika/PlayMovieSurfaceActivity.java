@@ -16,6 +16,7 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,14 +25,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.app.Activity;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.AspectFrameLayout;
+import com.android.grafika.core.MiscUtils;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.WindowSurface;
 
 import java.io.File;
 import java.io.IOException;

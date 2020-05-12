@@ -16,6 +16,7 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.os.Build;
@@ -23,10 +24,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.app.Activity;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.OffscreenSurface;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.OffscreenSurface;
 
 import java.io.File;
 import java.io.FileWriter;

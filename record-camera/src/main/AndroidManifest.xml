@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.grafika.record.camera">
+    <application>
+        <activity
+            android:name="com.android.grafika.record.camera.CameraCaptureActivity"
+            android:label="@string/title_activity_camera_capture" >
+        </activity>
+    </application>
+</manifest>

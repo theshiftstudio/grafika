@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameRateFormat">"%1$.3f fps (%2$d dropped)"</string>
+    <string name="toggleRecordingOn">Start recording</string>
+    <string name="toggleRecordingOff">Stop recording</string>
+    <string name="nowRecording">" [RECORDING]"</string>
+    <string name="title_activity_record_fbo">Record GL app</string>
+</resources>

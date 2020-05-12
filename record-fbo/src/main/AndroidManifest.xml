@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.grafika.recordfbo">
+
+    <application>
+        <activity
+            android:name="com.android.grafika.recordfbo.com.android.grafika.record.fbo.RecordFBOActivity"
+            android:label="@string/title_activity_record_fbo"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+
+            <!-- android:screenOrientation="landscape" -->
+            <!--
+                 Without the NoTitleBar theme, the widgets are partially transparent,
+                 and the SurfaceView colors bleed through.  Not sure why that is.
+            -->
+            <!-- android:theme="@android:style/Theme.NoTitleBar.Fullscreen" -->
+        </activity>
+    </application>
+</manifest>

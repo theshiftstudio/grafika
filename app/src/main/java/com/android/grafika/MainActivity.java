@@ -16,15 +16,16 @@
 
 package com.android.grafika;
 
-import android.os.Bundle;
 import android.app.ListActivity;
 import android.content.Intent;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.android.grafika.core.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +38,7 @@ import java.util.Map;
  * Main activity -- entry point from Launcher.
  */
 public class MainActivity extends ListActivity {
-    public static final String TAG = "Grafika";
+    public static final String TAG = Utils.TAG;
 
     // map keys
     private static final String TITLE = "title";
@@ -72,7 +73,7 @@ public class MainActivity extends ListActivity {
             "PlayMovieSurfaceActivity" },
         { "Record GL app",
             "Records GL app with FBO, re-render, or FB blit",
-            "RecordFBOActivity" },
+            "record.fbo.RecordFBOActivity" },
         { "Record screen using MediaProjectionManager",
                 "Screen recording using MediaProjectionManager and Virtual Display",
                 "ScreenRecordActivity" },
@@ -81,7 +82,7 @@ public class MainActivity extends ListActivity {
             "ScheduledSwapActivity" },
         { "Show + capture camera",
             "Shows camera preview, records when requested",
-            "CameraCaptureActivity" },
+            "record.camera.CameraCaptureActivity" },
         { "Simple GL in TextureView",
             "Renders with GL as quickly as possible",
             "TextureViewGLActivity" },

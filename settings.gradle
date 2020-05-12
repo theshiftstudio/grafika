@@ -1,1 +1,5 @@
+include ':record-camera'
+include ':record-fbo'
+include ':core'
+include ':videoencoder'
 include ':app'
