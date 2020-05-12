@@ -21,8 +21,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
@@ -46,7 +44,6 @@ import com.android.grafika.videoencoder.TextureMovieEncoder;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 /**
  * Shows the camera preview on screen while simultaneously recording it to a .mp4 file.
@@ -123,7 +120,8 @@ import java.lang.ref.WeakReference;
  * is managed as a static property of the Activity.
  */
 public class CameraCaptureActivity extends Activity
-        implements SurfaceTexture.OnFrameAvailableListener, OnItemSelectedListener {
+        implements OnItemSelectedListener,
+        CameraHandler.SurfaceTextureHandler, SurfaceTexture.OnFrameAvailableListener {
     private static final String TAG = Utils.TAG;
     private static final boolean VERBOSE = false;
 
@@ -380,7 +378,8 @@ public class CameraCaptureActivity extends Activity
     /**
      * Connects the SurfaceTexture to the Camera preview output, and starts the preview.
      */
-    private void handleSetSurfaceTexture(SurfaceTexture st) {
+    @Override
+    public void handleSetSurfaceTexture(SurfaceTexture st) {
         st.setOnFrameAvailableListener(this);
         try {
             mCamera.setPreviewTexture(st);
@@ -408,49 +407,4 @@ public class CameraCaptureActivity extends Activity
         mGLView.requestRender();
     }
 
-    /**
-     * Handles camera operation requests from other threads.  Necessary because the Camera
-     * must only be accessed from one thread.
-     * <p>
-     * The object is created on the UI thread, and all handlers run there.  Messages are
-     * sent from other threads, using sendMessage().
-     */
-    static class CameraHandler extends Handler {
-        public static final int MSG_SET_SURFACE_TEXTURE = 0;
-
-        // Weak reference to the Activity; only access this from the UI thread.
-        private WeakReference<CameraCaptureActivity> mWeakActivity;
-
-        public CameraHandler(CameraCaptureActivity activity) {
-            mWeakActivity = new WeakReference<CameraCaptureActivity>(activity);
-        }
-
-        /**
-         * Drop the reference to the activity.  Useful as a paranoid measure to ensure that
-         * attempts to access a stale Activity through a handler are caught.
-         */
-        public void invalidateHandler() {
-            mWeakActivity.clear();
-        }
-
-        @Override  // runs on UI thread
-        public void handleMessage(Message inputMessage) {
-            int what = inputMessage.what;
-            Log.d(TAG, "CameraHandler [" + this + "]: what=" + what);
-
-            CameraCaptureActivity activity = mWeakActivity.get();
-            if (activity == null) {
-                Log.w(TAG, "CameraHandler.handleMessage: activity is null");
-                return;
-            }
-
-            switch (what) {
-                case MSG_SET_SURFACE_TEXTURE:
-                    activity.handleSetSurfaceTexture((SurfaceTexture) inputMessage.obj);
-                    break;
-                default:
-                    throw new RuntimeException("unknown msg " + what);
-            }
-        }
-    }
 }

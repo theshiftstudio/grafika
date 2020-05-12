@@ -33,7 +33,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private static final int RECORDING_ON = 1;
     private static final int RECORDING_RESUMED = 2;
 
-    private CameraCaptureActivity.CameraHandler mCameraHandler;
+    private CameraHandler mCameraHandler;
     private TextureMovieEncoder mVideoEncoder;
     private File mOutputFile;
 
@@ -63,8 +63,8 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
      * @param movieEncoder video encoder object
      * @param outputFile output file for encoded video; forwarded to movieEncoder
      */
-    public CameraSurfaceRenderer(CameraCaptureActivity.CameraHandler cameraHandler,
-            TextureMovieEncoder movieEncoder, File outputFile) {
+    public CameraSurfaceRenderer(CameraHandler cameraHandler,
+                                 TextureMovieEncoder movieEncoder, File outputFile) {
         mCameraHandler = cameraHandler;
         mVideoEncoder = movieEncoder;
         mOutputFile = outputFile;
@@ -226,7 +226,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
 
         // Tell the UI thread to enable the camera preview.
         mCameraHandler.sendMessage(mCameraHandler.obtainMessage(
-                CameraCaptureActivity.CameraHandler.MSG_SET_SURFACE_TEXTURE, mSurfaceTexture));
+                CameraHandler.MSG_SET_SURFACE_TEXTURE, mSurfaceTexture));
     }
 
     @Override
@@ -320,6 +320,10 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         if (showBox && (++mFrameCount & 0x04) == 0) {
             drawBox();
         }
+    }
+
+    public SurfaceTexture getSurfaceTexture() {
+        return mSurfaceTexture;
     }
 
     /**

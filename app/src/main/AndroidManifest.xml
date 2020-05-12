@@ -16,6 +16,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.android.grafika"
     android:versionCode="33"
     android:versionName="1.0" >
@@ -32,8 +33,9 @@
         android:theme="@style/AppTheme" >
         <!-- android:theme="@android:style/Theme.DeviceDefault.Light.NoActionBar" > -->
         <activity
-            android:name="com.android.grafika.MainActivity"
-            android:label="@string/app_name" >
+            android:name=".record.camerax.CameraXCaptureActivity"
+            android:label="@string/app_name"
+            tools:replace="android:label">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
