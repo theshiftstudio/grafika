@@ -8,7 +8,7 @@
 
     <com.android.grafika.record.view.GLSurfaceCameraView
         android:id="@+id/camera_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_width="764px"
+        android:layout_height="764px"/>
 
 </FrameLayout>

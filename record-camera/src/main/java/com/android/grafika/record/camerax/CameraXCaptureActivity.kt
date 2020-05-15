@@ -26,7 +26,7 @@ class CameraXCaptureActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        cameraView.onResume()
+        cameraView.previewView.onResume()
     }
 
     override fun onPause() {

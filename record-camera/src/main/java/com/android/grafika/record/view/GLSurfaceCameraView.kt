@@ -1,18 +1,28 @@
 package com.android.grafika.record.view
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Matrix
+import android.graphics.Matrix.ScaleToFit
+import android.graphics.RectF
 import android.graphics.SurfaceTexture
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Gravity
 import android.view.Surface
+import android.view.View
+import android.view.animation.Transformation
+import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.core.SurfaceRequest
-import androidx.camera.core.impl.utils.executor.CameraXExecutors
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.camera.view.preview.transform.PreviewTransform
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
@@ -26,20 +36,28 @@ import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 
 class GLSurfaceCameraView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null
-) : GLSurfaceView(context, attrs), CameraHandler.SurfaceTextureHandler, SurfaceTexture.OnFrameAvailableListener {
+) : FrameLayout(context, attrs), CameraHandler.SurfaceTextureHandler, SurfaceTexture.OnFrameAvailableListener {
 
     var onSurfaceTextureAvailable: (GLSurfaceCameraView) -> Unit = { }
 
     private var surfaceReleaseFuture: ListenableFuture<SurfaceRequest.Result?>? = null
     var outputFile: File = File(context.filesDir, "camera-test.mp4")
 
+    val previewView: GLSurfaceView = GLSurfaceView(context).apply {
+        layoutParams = LayoutParams(1080, 1920)
+    }
     private var recordingEnabled = videoEncoder.isRecording
     private val cameraHandler = CameraHandler(this)
     private val renderer = CameraSurfaceRenderer(cameraHandler, videoEncoder, outputFile)
+    @SuppressLint("RestrictedApi")
+    private val previewTransform = PreviewTransform().apply {
+        scaleType = PreviewView.ScaleType.FILL_CENTER
+    }
 
     @CameraSelector.LensFacing
     private var lensFacing = CameraSelector.LENS_FACING_FRONT
@@ -54,11 +72,13 @@ class GLSurfaceCameraView @JvmOverloads constructor(
     }
 
     init {
-        setEGLContextClientVersion(2)
-        setRenderer(renderer)
-        renderMode = RENDERMODE_WHEN_DIRTY
+        this.addView(previewView, 0)
+        this.previewView.setEGLContextClientVersion(2)
+        this.previewView.setRenderer(renderer)
+        this.previewView.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
     }
 
+    @SuppressLint("RestrictedApi")
     fun bindLifecycleOwner(lifecycleOwner: LifecycleOwner) = post {
         val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -83,9 +103,11 @@ class GLSurfaceCameraView @JvmOverloads constructor(
                         lifecycleOwner, cameraSelector, preview)
                 // Attach the viewfinder's surface provider to preview use case
                 preview.setSurfaceProvider {
-                    queueEvent {
+                    renderer.surfaceTexture.setDefaultBufferSize(it.resolution.width, it.resolution.height)
+                    previewView.queueEvent {
                         renderer.setCameraPreviewSize(it.resolution.width, it.resolution.height)
                     }
+                    previewTransform.applyCurrentScaleType(this, previewView, it.resolution)
                     val surface = Surface(renderer.surfaceTexture)
                     val surfaceReleaseFuture = CallbackToFutureAdapter.getFuture { completer: CallbackToFutureAdapter.Completer<SurfaceRequest.Result?> ->
                         it.provideSurface(surface,
@@ -108,7 +130,7 @@ class GLSurfaceCameraView @JvmOverloads constructor(
         }, ContextCompat.getMainExecutor(context))
     }
 
-    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) = requestRender()
+    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) = previewView.requestRender()
 
     override fun handleSetSurfaceTexture(surfaceTexture: SurfaceTexture?) {
         surfaceTexture?.let {
@@ -119,7 +141,7 @@ class GLSurfaceCameraView @JvmOverloads constructor(
 
     fun toggleRecording() {
         recordingEnabled = recordingEnabled.not()
-        queueEvent {
+        previewView.queueEvent {
             renderer.changeRecordingState(recordingEnabled)
         }
     }
@@ -128,12 +150,14 @@ class GLSurfaceCameraView @JvmOverloads constructor(
         TODO("not implemented")
     }
 
-    override fun onPause() {
-        queueEvent {
+    fun onPause() {
+        previewView.queueEvent {
             renderer.notifyPausing()
         }
-        super.onPause()
+        previewView.onPause()
     }
+
+
 
     private fun aspectRatio(width: Int, height: Int): Int {
         val previewRatio = max(width, height).toDouble() / min(width, height)
@@ -142,6 +166,7 @@ class GLSurfaceCameraView @JvmOverloads constructor(
         }
         return AspectRatio.RATIO_16_9
     }
+
     companion object {
         private val TAG by lazy { GLSurfaceCameraView::class.java.simpleName }
         private const val RATIO_4_3_VALUE = 4.0 / 3.0

@@ -263,7 +263,7 @@ public class TextureMovieEncoder implements Runnable {
         private WeakReference<TextureMovieEncoder> mWeakEncoder;
 
         public EncoderHandler(TextureMovieEncoder encoder) {
-            mWeakEncoder = new WeakReference<TextureMovieEncoder>(encoder);
+            mWeakEncoder = new WeakReference<>(encoder);
         }
 
         @Override  // runs on encoder thread
