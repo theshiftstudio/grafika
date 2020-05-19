@@ -223,7 +223,7 @@ public class RecordFBOActivity extends Activity implements SurfaceHolder.Callbac
     /*
      * Choreographer callback, called near vsync.
      *
-     * @see android.view.Choreographer.FrameCallback#doFrame(long)
+     * @see android.androidx.camera.view.Choreographer.FrameCallback#doFrame(long)
      */
     @Override
     public void doFrame(long frameTimeNanos) {

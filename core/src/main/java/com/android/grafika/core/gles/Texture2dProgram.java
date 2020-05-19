@@ -81,7 +81,7 @@ public class Texture2dProgram {
     // at the border.
     //
     // This is not optimized for performance.  Some things that might make this faster:
-    // - Remove the conditionals.  They're used to present a half & half view with a red
+    // - Remove the conditionals.  They're used to present a half & half androidx.camera.view with a red
     //   stripe across the middle, but that's only useful for a demo.
     // - Unroll the loop.  Ideally the compiler does this for you when it's beneficial.
     // - Bake the filter kernel into the shader, instead of passing it through a uniform
@@ -297,7 +297,7 @@ public class Texture2dProgram {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(mTextureTarget, textureId);
 
-        // Copy the model / view / projection matrix over.
+        // Copy the model / androidx.camera.view / projection matrix over.
         GLES20.glUniformMatrix4fv(muMVPMatrixLoc, 1, false, mvpMatrix, 0);
         GlUtil.checkGlError("glUniformMatrix4fv");
 

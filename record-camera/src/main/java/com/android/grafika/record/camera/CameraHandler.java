@@ -20,6 +20,7 @@ public class CameraHandler extends Handler {
     private static final String TAG = Utils.TAG;
 
     public static final int MSG_SET_SURFACE_TEXTURE = 0;
+    public static final int MSG_PAUSE_SURFACE = 1;
 
     // Weak reference to the Activity; only access this from the UI thread.
     private WeakReference<SurfaceTextureHandler> mWeakSurfaceHandler;
@@ -49,7 +50,10 @@ public class CameraHandler extends Handler {
 
         switch (what) {
             case MSG_SET_SURFACE_TEXTURE:
-                surfaceTextureHandler.handleSetSurfaceTexture((SurfaceTexture) inputMessage.obj);
+                surfaceTextureHandler.handleSurfaceTextureAvailable((SurfaceTexture) inputMessage.obj);
+                break;
+            case MSG_PAUSE_SURFACE:
+                surfaceTextureHandler.pauseSurface();
                 break;
             default:
                 throw new RuntimeException("unknown msg " + what);
@@ -57,6 +61,7 @@ public class CameraHandler extends Handler {
     }
 
     public interface SurfaceTextureHandler {
-        void handleSetSurfaceTexture(SurfaceTexture surfaceTexture);
+        void handleSurfaceTextureAvailable(SurfaceTexture surfaceTexture);
+        void pauseSurface();
     }
 }

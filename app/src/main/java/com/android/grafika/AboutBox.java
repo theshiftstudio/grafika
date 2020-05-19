@@ -58,7 +58,7 @@ public class AboutBox {
         String versionStr = getVersionString(caller);
         String aboutHeader = caller.getString(R.string.app_name) + " v" + versionStr;
 
-        // Manually inflate the view that will form the body of the dialog.
+        // Manually inflate the androidx.camera.view that will form the body of the dialog.
         View aboutView;
         try {
             aboutView = caller.getLayoutInflater().inflate(R.layout.about_dialog, null);

@@ -31,7 +31,7 @@ public class WorkDialog {
     private WorkDialog() {}     // nah
 
     /**
-     * Prepares an alert dialog builder, using the work_dialog view.
+     * Prepares an alert dialog builder, using the work_dialog androidx.camera.view.
      * <p>
      * The caller should finish populating the builder, then call AlertDialog.Builder#show().
      */

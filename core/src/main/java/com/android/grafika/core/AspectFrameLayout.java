@@ -78,7 +78,7 @@ public class AspectFrameLayout extends FrameLayout {
                 // 1280x720 to scaled 1280x719 because of some floating-point round-off error,
                 // so if we're really close just leave it alone.
                 Log.d(TAG, "aspect ratio is good (target=" + mTargetAspect +
-                        ", view=" + initialWidth + "x" + initialHeight + ")");
+                        ", androidx.camera.view=" + initialWidth + "x" + initialHeight + ")");
             } else {
                 if (aspectDiff > 0) {
                     // limited by narrow width; restrict height

@@ -43,7 +43,7 @@ import com.android.grafika.core.gles.WindowSurface;
  * </ul>
  * <p>
  * To watch this in systrace, use
- * <code>systrace.py --app=com.android.grafika gfx view sched dalvik</code>
+ * <code>systrace.py --app=com.android.grafika gfx androidx.camera.view sched dalvik</code>
  * (most interesting while bouncing).
  */
 public class MultiSurfaceActivity extends Activity implements SurfaceHolder.Callback {

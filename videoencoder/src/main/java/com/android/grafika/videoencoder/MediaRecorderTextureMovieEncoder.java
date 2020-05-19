@@ -63,7 +63,7 @@ import java.lang.ref.WeakReference;
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-public class TextureMovieEncoder implements Runnable {
+public class MediaRecorderTextureMovieEncoder implements Runnable {
     private static final String TAG = Utils.TAG;
     private static final boolean VERBOSE = false;
 
@@ -82,7 +82,7 @@ public class TextureMovieEncoder implements Runnable {
     private FullFrameRect mFullScreen;
     private int mTextureId;
     private int mFrameNum;
-    private MediaRecorderVideoEncoderCore mVideoEncoder;
+    private VideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
     private volatile EncoderHandler mHandler;
@@ -286,7 +286,7 @@ public class TextureMovieEncoder implements Runnable {
     /**
      * Encoder thread entry point.  Establishes Looper/Handler and waits for messages.
      * <p>
-     * @see java.lang.Thread#run()
+     * @see Thread#run()
      */
     @Override
     public void run() {
@@ -311,9 +311,9 @@ public class TextureMovieEncoder implements Runnable {
      * Handles encoder state change requests.  The handler is created on the encoder thread.
      */
     private static class EncoderHandler extends Handler {
-        private WeakReference<TextureMovieEncoder> mWeakEncoder;
+        private WeakReference<MediaRecorderTextureMovieEncoder> mWeakEncoder;
 
-        public EncoderHandler(TextureMovieEncoder encoder) {
+        public EncoderHandler(MediaRecorderTextureMovieEncoder encoder) {
             mWeakEncoder = new WeakReference<>(encoder);
         }
 
@@ -322,7 +322,7 @@ public class TextureMovieEncoder implements Runnable {
             int what = inputMessage.what;
             Object obj = inputMessage.obj;
 
-            TextureMovieEncoder encoder = mWeakEncoder.get();
+            MediaRecorderTextureMovieEncoder encoder = mWeakEncoder.get();
             if (encoder == null) {
                 Log.w(TAG, "EncoderHandler.handleMessage: encoder is null");
                 return;
@@ -372,7 +372,7 @@ public class TextureMovieEncoder implements Runnable {
     }
 
     private void handleResumeRecording() {
-        mVideoEncoder.resumeRecording();
+        mVideoEncoder.resume();
     }
 
     /**
@@ -386,7 +386,7 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleFrameAvailable(float[] transform, long timestampNanos) {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
-//        mVideoEncoder.drainEncoder(false);
+        mVideoEncoder.drainEncoder(false);
         mFullScreen.drawFrame(mTextureId, transform);
 
         drawBox(mFrameNum++);
@@ -400,12 +400,12 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleStopRecording() {
         Log.d(TAG, "handleStopRecording");
-//        mVideoEncoder.drainEncoder(true);
+        mVideoEncoder.drainEncoder(true);
         releaseEncoder();
     }
 
     private void handlePauseRecording() {
-        mVideoEncoder.pauseRecording();
+        mVideoEncoder.pause();
     }
 
     /**
@@ -444,20 +444,9 @@ public class TextureMovieEncoder implements Runnable {
     private void prepareEncoder(EGLContext sharedContext, int width, int height, int bitRate,
             File outputFile) {
         try {
-            mVideoEncoder = new MediaRecorderVideoEncoderCore. Builder()
-                    .width(() -> width)
-                    .height(() -> height)
-                    .videoBitRate(() -> bitRate)
-                    .outputFile(() -> outputFile)
-                    .build()
-                    .prepare()
-                    .startRecording();
-        } catch (IllegalStateException e){
-            mVideoEncoder.releaseMediaRecorder();
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            mVideoEncoder.releaseMediaRecorder();
-            throw new RuntimeException(e);
+            mVideoEncoder = new VideoEncoderCore(width, height, bitRate, outputFile);
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
         }
         mEglCore = new EglCore(sharedContext, EglCore.FLAG_RECORDABLE);
         mInputWindowSurface = new WindowSurface(mEglCore, mVideoEncoder.getInputSurface(), true);
@@ -468,7 +457,7 @@ public class TextureMovieEncoder implements Runnable {
     }
 
     private void releaseEncoder() {
-        mVideoEncoder.releaseMediaRecorder();
+        mVideoEncoder.release();
         if (mInputWindowSurface != null) {
             mInputWindowSurface.release();
             mInputWindowSurface = null;

@@ -63,7 +63,7 @@ public class MainActivity extends ListActivity {
             "Exercises SurfaceHolder#setFixedSize()",
             "HardwareScalerActivity" },
         { "Live camera (TextureView)",
-            "Trivially feeds the camera preview to a view",
+            "Trivially feeds the camera preview to a androidx.camera.view",
             "LiveCameraActivity" },
         { "Multi-surface test",
             "Three overlapping SurfaceViews, one secure",

@@ -1,5 +1,6 @@
 package com.android.grafika.record.camera;
 
+import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
@@ -8,6 +9,8 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
+import androidx.camera.core.impl.utils.Threads;
 
 import com.android.grafika.core.Utils;
 import com.android.grafika.core.gles.FullFrameRect;
@@ -29,13 +32,15 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = Utils.TAG;
     private static final boolean VERBOSE = false;
 
+    private static final int RECORDING_NULL = -1;
     private static final int RECORDING_OFF = 0;
     private static final int RECORDING_ON = 1;
     private static final int RECORDING_RESUMED = 2;
+    private static final int RECORDING_PAUSED = 3;
 
     private CameraHandler mCameraHandler;
     private TextureMovieEncoder mVideoEncoder;
-    private File mOutputFile;
+    private TextureMovieEncoder.EncoderConfig mEncoderConfig;
 
     private FullFrameRect mFullScreen;
 
@@ -43,8 +48,8 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private int mTextureId;
 
     private SurfaceTexture mSurfaceTexture;
-    private boolean mRecordingEnabled;
     private int mRecordingStatus;
+    private int mRequestRecordingStatus;
     private int mFrameCount;
 
     // width/height of the incoming camera preview frames
@@ -61,18 +66,15 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
      * <p>
      * @param cameraHandler Handler for communicating with UI thread
      * @param movieEncoder video encoder object
-     * @param outputFile output file for encoded video; forwarded to movieEncoder
      */
-    public CameraSurfaceRenderer(CameraHandler cameraHandler,
-                                 TextureMovieEncoder movieEncoder, File outputFile) {
+    public CameraSurfaceRenderer(CameraHandler cameraHandler, TextureMovieEncoder movieEncoder) {
         mCameraHandler = cameraHandler;
         mVideoEncoder = movieEncoder;
-        mOutputFile = outputFile;
 
         mTextureId = -1;
 
-        mRecordingStatus = -1;
-        mRecordingEnabled = false;
+        mRecordingStatus = RECORDING_NULL;
+        mRequestRecordingStatus = RECORDING_NULL;
         mFrameCount = -1;
 
         mIncomingSizeUpdated = false;
@@ -101,12 +103,51 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         mIncomingWidth = mIncomingHeight = -1;
     }
 
-    /**
-     * Notifies the renderer that we want to stop or start recording.
-     */
-    public void changeRecordingState(boolean isRecording) {
-        Log.d(TAG, "changeRecordingState: was " + mRecordingEnabled + " now " + isRecording);
-        mRecordingEnabled = isRecording;
+    @SuppressLint("RestrictedApi")
+    public void startRecording(File outputFile) {
+        Threads.checkBackgroundThread();
+        this.mEncoderConfig = baseConfigBuilder(outputFile)
+                .build();
+        this.mRequestRecordingStatus = RECORDING_ON;
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void startRecording(File outputFile, int bitRate) {
+        Threads.checkBackgroundThread();
+        this.mEncoderConfig = baseConfigBuilder(outputFile)
+                .setBitRate(bitRate)
+                .build();
+        this.mRequestRecordingStatus = RECORDING_ON;
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void resumeRecoding() {
+        Threads.checkBackgroundThread();
+        this.mRequestRecordingStatus = RECORDING_RESUMED;
+    }
+
+    @SuppressLint("RestrictedApi")
+    public void pauseRecording() {
+        Threads.checkBackgroundThread();
+        this.mRequestRecordingStatus = RECORDING_PAUSED;
+    }
+
+    @SuppressLint("RestrictedApi")
+    @WorkerThread
+    public void stopRecording() {
+        Threads.checkBackgroundThread();
+        if (mEncoderConfig == null || mEncoderConfig.mOutputFile == null) {
+            throw new IllegalStateException("EncoderConfig == null!");
+        }
+        this.mRequestRecordingStatus = RECORDING_OFF;
+        mEncoderConfig = null;
+    }
+
+    private TextureMovieEncoder.EncoderConfig.Builder baseConfigBuilder(File outputFile) {
+        return new TextureMovieEncoder.EncoderConfig.Builder()
+                .setWidth(mIncomingWidth)
+                .setHeight(mIncomingHeight)
+                .setOutputFile(outputFile);
     }
 
     /**
@@ -205,11 +246,16 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         // We're starting up or coming back.  Either way we've got a new EGLContext that will
         // need to be shared with the video encoder, so figure out if a recording is already
         // in progress.
-        mRecordingEnabled = mVideoEncoder.isRecording();
-        if (mRecordingEnabled) {
-            mRecordingStatus = RECORDING_RESUMED;
-        } else {
-            mRecordingStatus = RECORDING_OFF;
+        switch (mRecordingStatus) {
+            case RECORDING_NULL:
+                mRequestRecordingStatus = mVideoEncoder.isRecording()
+                        ? RECORDING_ON
+                        : RECORDING_NULL;
+                mRecordingStatus = RECORDING_OFF;
+                break;
+            case RECORDING_PAUSED:
+                mRequestRecordingStatus = RECORDING_RESUMED;
+                break;
         }
 
         // Set up the texture blitter that will be used for on-screen display.  This
@@ -247,42 +293,21 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         // If the recording state is changing, take care of it here.  Ideally we wouldn't
         // be doing all this in onDrawFrame(), but the EGLContext sharing with GLSurfaceView
         // makes it hard to do elsewhere.
-        if (mRecordingEnabled) {
-            switch (mRecordingStatus) {
-                case RECORDING_OFF:
-                    Log.d(TAG, "START recording");
-                    // start recording
-                    mVideoEncoder.startRecording(new TextureMovieEncoder.EncoderConfig(
-                            mOutputFile, 640, 480, 1000000, EGL14.eglGetCurrentContext()));
-                    mRecordingStatus = RECORDING_ON;
-                    break;
-                case RECORDING_RESUMED:
-                    Log.d(TAG, "RESUME recording");
-                    mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext());
-                    mRecordingStatus = RECORDING_ON;
-                    break;
-                case RECORDING_ON:
-                    // yay
-                    break;
-                default:
-                    throw new RuntimeException("unknown status " + mRecordingStatus);
-            }
-        } else {
-            switch (mRecordingStatus) {
-                case RECORDING_ON:
-                case RECORDING_RESUMED:
-                    // stop recording
-                    Log.d(TAG, "STOP recording");
-                    mVideoEncoder.stopRecording();
-                    mRecordingStatus = RECORDING_OFF;
-                    break;
-                case RECORDING_OFF:
-                    // yay
-                    break;
-                default:
-                    throw new RuntimeException("unknown status " + mRecordingStatus);
-            }
+        switch (mRequestRecordingStatus) {
+            case RECORDING_ON:
+                handleRequestRecordingOn();
+                break;
+            case RECORDING_RESUMED:
+                handleRequestRecordingResume();
+                break;
+            case RECORDING_PAUSED:
+                handleRequestRecordingPause();
+                break;
+            case RECORDING_OFF:
+                handleRequestRecordingOff();
+                break;
         }
+        mRequestRecordingStatus = RECORDING_NULL;
 
         // Set the video encoder's texture name.  We only need to do this once, but in the
         // current implementation it has to happen after the video encoder is started, so
@@ -319,6 +344,88 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         showBox = (mRecordingStatus == RECORDING_ON);
         if (showBox && (++mFrameCount & 0x04) == 0) {
             drawBox();
+        }
+    }
+
+    private void handleRequestRecordingOn() {
+        switch (mRecordingStatus) {
+            case RECORDING_OFF:
+                Log.d(TAG, "START recording");
+                // start recording
+                mVideoEncoder.startRecording(mEncoderConfig);
+                mRecordingStatus = RECORDING_ON;
+                break;
+            case RECORDING_PAUSED:
+                Log.d(TAG, "RESUME recording");
+                mVideoEncoder.resumeRecording();
+                mRecordingStatus = RECORDING_ON;
+                break;
+            case RECORDING_RESUMED:
+                Log.d(TAG, "RESUME recording");
+                mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext());
+                mRecordingStatus = RECORDING_ON;
+                break;
+            case RECORDING_ON:
+                // yay
+                break;
+            default:
+                throw new RuntimeException("unknown status " + mRecordingStatus);
+        }
+    }
+
+    private void handleRequestRecordingResume() {
+        switch (mRecordingStatus) {
+            case RECORDING_OFF:
+                throw new IllegalStateException("Requesting to resume after stop! Start first");
+            case RECORDING_PAUSED:
+                Log.d(TAG, "RESUME recording");
+                mVideoEncoder.resumeRecording();
+                mRecordingStatus = RECORDING_ON;
+                break;
+            case RECORDING_RESUMED:
+                //do nothing
+                break;
+            case RECORDING_ON:
+//                throw new IllegalStateException("Requesting to resume after start! Pause first");
+                break;
+            default:
+                throw new RuntimeException("unknown status " + mRecordingStatus);
+        }
+    }
+
+    public void handleRequestRecordingPause() {
+        switch (mRecordingStatus) {
+            case RECORDING_OFF:
+//                throw new IllegalStateException("Requesting to pause after stop! Start first");
+            case RECORDING_PAUSED:
+                //do nothing
+                break;
+            case RECORDING_RESUMED:
+            case RECORDING_ON:
+                mVideoEncoder.pauseRecording();
+                mRecordingStatus = RECORDING_PAUSED;
+                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_PAUSE_SURFACE));
+                break;
+            default:
+                throw new RuntimeException("unknown status " + mRecordingStatus);
+        }
+    }
+
+    private void handleRequestRecordingOff() {
+        switch (mRecordingStatus) {
+            case RECORDING_ON:
+            case RECORDING_RESUMED:
+                // stop recording
+                Log.d(TAG, "STOP recording");
+                mVideoEncoder.stopRecording();
+                mRecordingStatus = RECORDING_OFF;
+                break;
+            case RECORDING_PAUSED:
+            case RECORDING_OFF:
+                // yay
+                break;
+            default:
+                throw new RuntimeException("unknown status " + mRecordingStatus);
         }
     }
 

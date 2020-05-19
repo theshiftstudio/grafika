@@ -66,7 +66,7 @@ public class Drawable2d {
             GlUtil.createFloatBuffer(RECTANGLE_TEX_COORDS);
 
     /**
-     * A "full" square, extending from -1 to +1 in both dimensions.  When the model/view/projection
+     * A "full" square, extending from -1 to +1 in both dimensions.  When the model/androidx.camera.view/projection
      * matrix is identity, this will exactly cover the viewport.
      * <p>
      * The texture coordinates are Y-inverted relative to RECTANGLE.  (This seems to work out

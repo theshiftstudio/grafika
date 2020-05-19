@@ -96,7 +96,7 @@ public class FlatShadedProgram {
         GLES20.glUseProgram(mProgramHandle);
         GlUtil.checkGlError("glUseProgram");
 
-        // Copy the model / view / projection matrix over.
+        // Copy the model / androidx.camera.view / projection matrix over.
         GLES20.glUniformMatrix4fv(muMVPMatrixLoc, 1, false, mvpMatrix, 0);
         GlUtil.checkGlError("glUniformMatrix4fv");
 

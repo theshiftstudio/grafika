@@ -34,6 +34,10 @@ import androidx.core.content.ContextCompat;
  */
 public class PermissionHelper {
   public static final int  RC_PERMISSION_REQUEST = 9222;
+  public static boolean hasAudioPermission(Activity activity) {
+    return ContextCompat.checkSelfPermission(activity,
+            Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+  }
   public static boolean hasCameraPermission(Activity activity) {
     return ContextCompat.checkSelfPermission(activity,
             Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;

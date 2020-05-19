@@ -20,6 +20,7 @@ import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 
@@ -116,6 +117,28 @@ public class VideoEncoderCore {
             mMuxer.release();
             mMuxer = null;
         }
+    }
+
+    public void pause() {
+        if (mEncoder != null) {
+            Bundle params = new Bundle();
+            params.putInt(MediaCodec.PARAMETER_KEY_SUSPEND, 1);
+            mEncoder.setParameters(params);
+        }
+//        if (mMuxer != null) {
+//            mMuxer.stop();
+//        }
+    }
+
+    public void resume() {
+        if (mEncoder != null) {
+            Bundle params = new Bundle();
+            params.putInt(MediaCodec.PARAMETER_KEY_SUSPEND, 0);
+            mEncoder.setParameters(params);
+        }
+//        if (mMuxer != null) {
+//            mMuxer.start();
+//        }
     }
 
     /**

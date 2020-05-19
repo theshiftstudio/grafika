@@ -131,7 +131,7 @@ public class Sprite2d {
     }
 
     /**
-     * Returns the model-view matrix.
+     * Returns the model-androidx.camera.view matrix.
      * <p>
      * To avoid allocations, this returns internal state.  The caller must not modify it.
      */
@@ -171,7 +171,7 @@ public class Sprite2d {
      * Draws the rectangle with the supplied program and projection matrix.
      */
     public void draw(FlatShadedProgram program, float[] projectionMatrix) {
-        // Compute model/view/projection matrix.
+        // Compute model/androidx.camera.view/projection matrix.
         Matrix.multiplyMM(mScratchMatrix, 0, projectionMatrix, 0, getModelViewMatrix(), 0);
 
         program.draw(mScratchMatrix, mColor, mDrawable.getVertexArray(), 0,
@@ -183,7 +183,7 @@ public class Sprite2d {
      * Draws the rectangle with the supplied program and projection matrix.
      */
     public void draw(Texture2dProgram program, float[] projectionMatrix) {
-        // Compute model/view/projection matrix.
+        // Compute model/androidx.camera.view/projection matrix.
         Matrix.multiplyMM(mScratchMatrix, 0, projectionMatrix, 0, getModelViewMatrix(), 0);
 
         program.draw(mScratchMatrix, mDrawable.getVertexArray(), 0,

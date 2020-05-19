@@ -96,7 +96,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
         setContentView(R.layout.activity_hardware_scaler);
 
         mSelectedSize = SURFACE_SIZE_FULL;
-        mFullViewWidth = mFullViewHeight = 512;     // want actual view size, but it's not avail
+        mFullViewWidth = mFullViewHeight = 512;     // want actual androidx.camera.view size, but it's not avail
         mWindowWidthHeight = new int[SURFACE_DIM.length][2];
         updateControls();
 
@@ -130,7 +130,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d(TAG, "surfaceCreated holder=" + holder);
 
-        // Grab the view's width.  It's not available before now.
+        // Grab the androidx.camera.view's width.  It's not available before now.
         Rect size = holder.getSurfaceFrame();
         mFullViewWidth = size.width();
         mFullViewHeight = size.height();
@@ -156,7 +156,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
             }
         }
 
-        // Some controls include text based on the view dimensions, so update now.
+        // Some controls include text based on the androidx.camera.view dimensions, so update now.
         updateControls();
 
         SurfaceView sv = (SurfaceView) findViewById(R.id.hardwareScaler_surfaceView);
@@ -213,7 +213,7 @@ public class HardwareScalerActivity extends Activity implements SurfaceHolder.Ca
     /*
      * Choreographer callback, called near vsync.
      *
-     * @see android.view.Choreographer.FrameCallback#doFrame(long)
+     * @see android.androidx.camera.view.Choreographer.FrameCallback#doFrame(long)
      */
     @Override
     public void doFrame(long frameTimeNanos) {

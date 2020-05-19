@@ -172,7 +172,7 @@ public class CameraCaptureActivity extends Activity
         // appropriate EGL context.
         mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
         mGLView.setEGLContextClientVersion(2);     // select GLES 2.0
-        mRenderer = new CameraSurfaceRenderer(mCameraHandler, sVideoEncoder, outputFile);
+        mRenderer = new CameraSurfaceRenderer(mCameraHandler, sVideoEncoder);
         mGLView.setRenderer(mRenderer);
         mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
@@ -348,7 +348,7 @@ public class CameraCaptureActivity extends Activity
         mGLView.queueEvent(new Runnable() {
             @Override public void run() {
                 // notify the renderer that we want to change the encoder's state
-                mRenderer.changeRecordingState(mRecordingEnabled);
+//                mRenderer.changeRecordingState(mRecordingEnabled);
             }
         });
         updateControls();
@@ -379,7 +379,7 @@ public class CameraCaptureActivity extends Activity
      * Connects the SurfaceTexture to the Camera preview output, and starts the preview.
      */
     @Override
-    public void handleSetSurfaceTexture(SurfaceTexture st) {
+    public void handleSurfaceTextureAvailable(SurfaceTexture st) {
         st.setOnFrameAvailableListener(this);
         try {
             mCamera.setPreviewTexture(st);
@@ -387,6 +387,11 @@ public class CameraCaptureActivity extends Activity
             throw new RuntimeException(ioe);
         }
         mCamera.startPreview();
+    }
+
+    @Override
+    public void pauseSurface() {
+
     }
 
     @Override

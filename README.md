@@ -100,7 +100,7 @@ Current features
   an exercise for the reader).
 
 [Live camera (TextureView)](app/src/main/java/com/android/grafika/LiveCameraActivity.java).  Directs the camera preview to a `TextureView`.
-- This comes more or less verbatim from the [TextureView](http://developer.android.com/reference/android/view/TextureView.html) documentation.
+- This comes more or less verbatim from the [TextureView](http://developer.android.com/reference/android/androidx.camera.view/TextureView.html) documentation.
 - Uses the default (rear-facing) camera.  If the device has no default camera (e.g.
   Nexus 7 (2012)), the Activity will crash.
 
@@ -138,7 +138,7 @@ requires API level 23 (Marshmallow) or greater.
   doesn't really look any different on API 18 to the naked eye.
 - You can configure the frame delivery timing (e.g. 24fps uses a 3-2 pattern) and how far
   in advance frames are scheduled.  Selecting "ASAP" disables scheduling.
-- Use systrace with tags `sched gfx view --app=com.android.grafika` to observe the effects.
+- Use systrace with tags `sched gfx androidx.camera.view --app=com.android.grafika` to observe the effects.
 - The moving square changes colors when the app is unhappy about timing.
 
 [Show + capture camera](app/src/main/java/com/android/grafika/CameraCaptureActivity.java).  Attempts to record at 720p from the front-facing camera, displaying the preview and recording it simultaneously.

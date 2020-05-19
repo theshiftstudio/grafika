@@ -99,7 +99,7 @@ public class PlayMovieActivity extends Activity implements OnItemSelectedListene
         // after a device rotation.
         //
         // We want to be sure that the player won't continue to send frames after we pause,
-        // because we're tearing the view down.  So we wait for it to stop here.
+        // because we're tearing the androidx.camera.view down.  So we wait for it to stop here.
         if (mPlayTask != null) {
             stopPlayback();
             mPlayTask.waitForStop();
@@ -231,7 +231,7 @@ public class PlayMovieActivity extends Activity implements OnItemSelectedListene
         int xoff = (viewWidth - newWidth) / 2;
         int yoff = (viewHeight - newHeight) / 2;
         Log.v(TAG, "video=" + videoWidth + "x" + videoHeight +
-                " view=" + viewWidth + "x" + viewHeight +
+                " androidx.camera.view=" + viewWidth + "x" + viewHeight +
                 " newView=" + newWidth + "x" + newHeight +
                 " off=" + xoff + "," + yoff);
 

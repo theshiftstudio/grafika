@@ -1,36 +1,31 @@
 package com.android.grafika.record.camerax
 
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.view.RecordCameraView
 import com.android.grafika.record.camera.R
-import com.android.grafika.record.view.CameraView
-import com.android.grafika.record.view.GLSurfaceCameraView
+import com.android.grafika.record.view.GLCameraView
+import java.io.File
 
 class CameraXCaptureActivity : AppCompatActivity() {
 
-    private val cameraView by lazy {
-        findViewById<GLSurfaceCameraView>(R.id.camera_view)
-    }
+    private val cameraView by lazy { findViewById<RecordCameraView>(R.id.camera_view) }
+    private val flip by lazy { findViewById<Button>(R.id.flip) }
+    private val record by lazy { findViewById<Button>(R.id.record) }
+    private val outputFile by lazy { File(filesDir, "camera-test.mp4") }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_x_capture)
-        cameraView.onSurfaceTextureAvailable = {
-            it.bindLifecycleOwner(this)
-            cameraView.toggleRecording()
-            cameraView.postDelayed({
-                cameraView.toggleRecording()
-            }, 10_000)
+        cameraView.bindLifecycleOwner(this)
+        flip.setOnClickListener {
+            cameraView.flipCameras(this)
+        }
+        record.setOnClickListener {
+            cameraView.toggleRecording(outputFile)
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        cameraView.previewView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        cameraView.onPause()
-    }
 }
