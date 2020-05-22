@@ -46,8 +46,7 @@ import com.android.grafika.core.gles.Sprite2d;
 import com.android.grafika.core.gles.Texture2dProgram;
 import com.android.grafika.core.gles.WindowSurface;
 import com.android.grafika.recordfbo.R;
-import com.android.grafika.videoencoder.TextureMovieEncoder2;
-import com.android.grafika.videoencoder.MuxerVideoEncoderCore;
+import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore;
 
 import java.io.File;
 import java.io.IOException;
