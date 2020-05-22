@@ -65,7 +65,7 @@ import java.lang.ref.WeakReference;
  */
 public class TextureMovieEncoder implements Runnable {
     private static final String TAG = Utils.TAG;
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
 
     private static final int MSG_START_RECORDING = 0;
     private static final int MSG_STOP_RECORDING = 1;
@@ -82,7 +82,7 @@ public class TextureMovieEncoder implements Runnable {
     private FullFrameRect mFullScreen;
     private int mTextureId;
     private int mFrameNum;
-    private MediaRecorderVideoEncoderCore mVideoEncoder;
+    private MuxerVideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
     private volatile EncoderHandler mHandler;
@@ -128,7 +128,7 @@ public class TextureMovieEncoder implements Runnable {
             private File outputFile;
             private int width;
             private int height;
-            private int bitRate = 1080 * 1000; //720kbps
+            private int bitRate; //1080 kbps
             private EGLContext eglContext = EGL14.eglGetCurrentContext();
 
             public Builder setOutputFile(File outputFile) {
@@ -372,7 +372,7 @@ public class TextureMovieEncoder implements Runnable {
     }
 
     private void handleResumeRecording() {
-        mVideoEncoder.resumeRecording();
+        mVideoEncoder.resume();
     }
 
     /**
@@ -386,7 +386,7 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleFrameAvailable(float[] transform, long timestampNanos) {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
-//        mVideoEncoder.drainEncoder(false);
+        mVideoEncoder.drainEncoder(false);
         mFullScreen.drawFrame(mTextureId, transform);
 
         drawBox(mFrameNum++);
@@ -400,12 +400,12 @@ public class TextureMovieEncoder implements Runnable {
      */
     private void handleStopRecording() {
         Log.d(TAG, "handleStopRecording");
-//        mVideoEncoder.drainEncoder(true);
+        mVideoEncoder.drainEncoder(true);
         releaseEncoder();
     }
 
     private void handlePauseRecording() {
-        mVideoEncoder.pauseRecording();
+        mVideoEncoder.pause();
     }
 
     /**
@@ -442,21 +442,12 @@ public class TextureMovieEncoder implements Runnable {
     }
 
     private void prepareEncoder(EGLContext sharedContext, int width, int height, int bitRate,
-            File outputFile) {
+                                File outputFile) {
         try {
-            mVideoEncoder = new MediaRecorderVideoEncoderCore. Builder()
-                    .width(() -> width)
-                    .height(() -> height)
-                    .videoBitRate(() -> bitRate)
-                    .outputFile(() -> outputFile)
-                    .build()
-                    .prepare()
-                    .startRecording();
+            mVideoEncoder = new MuxerVideoEncoderCore(width, height, bitRate, outputFile);
         } catch (IllegalStateException e){
-            mVideoEncoder.releaseMediaRecorder();
             throw new RuntimeException(e);
         } catch (IOException e) {
-            mVideoEncoder.releaseMediaRecorder();
             throw new RuntimeException(e);
         }
         mEglCore = new EglCore(sharedContext, EglCore.FLAG_RECORDABLE);
@@ -468,7 +459,7 @@ public class TextureMovieEncoder implements Runnable {
     }
 
     private void releaseEncoder() {
-        mVideoEncoder.releaseMediaRecorder();
+        mVideoEncoder.release();
         if (mInputWindowSurface != null) {
             mInputWindowSurface.release();
             mInputWindowSurface = null;

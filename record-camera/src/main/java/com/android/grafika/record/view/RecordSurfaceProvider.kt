@@ -42,7 +42,7 @@ class RecordSurfaceProvider<T>(
         }
         this.surfaceReleaseFuture = surfaceReleaseFuture
         this.surfaceReleaseFuture?.addListener(Runnable {
-            surface!!.release()
+            surface?.release()
             surface = null
             if (this.surfaceReleaseFuture === surfaceReleaseFuture) {
                 this.surfaceReleaseFuture = null

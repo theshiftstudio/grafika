@@ -18,6 +18,7 @@ package com.android.grafika.videoencoder;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
+import android.media.MediaCodec;
 import android.opengl.EGL14;
 import android.opengl.EGLContext;
 import android.opengl.GLES20;
@@ -25,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.Surface;
 
 import androidx.core.util.Preconditions;
 
@@ -63,9 +65,9 @@ import java.lang.ref.WeakReference;
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-public class MediaRecorderTextureMovieEncoder implements Runnable {
+public class MediaRecorderTextureVideoEncoder implements Runnable {
     private static final String TAG = Utils.TAG;
-    private static final boolean VERBOSE = false;
+    private static final boolean VERBOSE = true;
 
     private static final int MSG_START_RECORDING = 0;
     private static final int MSG_STOP_RECORDING = 1;
@@ -82,7 +84,7 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
     private FullFrameRect mFullScreen;
     private int mTextureId;
     private int mFrameNum;
-    private VideoEncoderCore mVideoEncoder;
+    private MediaRecorderWrapper mVideoEncoder;
 
     // ----- accessed by multiple threads -----
     private volatile EncoderHandler mHandler;
@@ -128,7 +130,7 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
             private File outputFile;
             private int width;
             private int height;
-            private int bitRate = 1080 * 1000; //720kbps
+            private int bitRate; //1080 kbps
             private EGLContext eglContext = EGL14.eglGetCurrentContext();
 
             public Builder setOutputFile(File outputFile) {
@@ -311,9 +313,9 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
      * Handles encoder state change requests.  The handler is created on the encoder thread.
      */
     private static class EncoderHandler extends Handler {
-        private WeakReference<MediaRecorderTextureMovieEncoder> mWeakEncoder;
+        private WeakReference<MediaRecorderTextureVideoEncoder> mWeakEncoder;
 
-        public EncoderHandler(MediaRecorderTextureMovieEncoder encoder) {
+        public EncoderHandler(MediaRecorderTextureVideoEncoder encoder) {
             mWeakEncoder = new WeakReference<>(encoder);
         }
 
@@ -322,7 +324,7 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
             int what = inputMessage.what;
             Object obj = inputMessage.obj;
 
-            MediaRecorderTextureMovieEncoder encoder = mWeakEncoder.get();
+            MediaRecorderTextureVideoEncoder encoder = mWeakEncoder.get();
             if (encoder == null) {
                 Log.w(TAG, "EncoderHandler.handleMessage: encoder is null");
                 return;
@@ -372,7 +374,7 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
     }
 
     private void handleResumeRecording() {
-        mVideoEncoder.resume();
+        mVideoEncoder.resumeRecording();
     }
 
     /**
@@ -386,12 +388,8 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
      */
     private void handleFrameAvailable(float[] transform, long timestampNanos) {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
-        mVideoEncoder.drainEncoder(false);
         mFullScreen.drawFrame(mTextureId, transform);
-
-        drawBox(mFrameNum++);
-
-        mInputWindowSurface.setPresentationTime(timestampNanos);
+        if (VERBOSE) drawBox(mFrameNum++);
         mInputWindowSurface.swapBuffers();
     }
 
@@ -400,12 +398,12 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
      */
     private void handleStopRecording() {
         Log.d(TAG, "handleStopRecording");
-        mVideoEncoder.drainEncoder(true);
+        mVideoEncoder.stopRecording();
         releaseEncoder();
     }
 
     private void handlePauseRecording() {
-        mVideoEncoder.pause();
+        mVideoEncoder.pauseRecording();
     }
 
     /**
@@ -442,11 +440,31 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
     }
 
     private void prepareEncoder(EGLContext sharedContext, int width, int height, int bitRate,
-            File outputFile) {
+                                File outputFile) {
         try {
-            mVideoEncoder = new VideoEncoderCore(width, height, bitRate, outputFile);
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
+            Surface inputSurface = MediaCodec.createPersistentInputSurface();
+            new MediaRecorderWrapper.Builder()
+                    .width(() -> width)
+                    .height(() -> height)
+                    .videoBitRate(() -> bitRate)
+                    .outputFile(() -> outputFile)
+                    .inputSurface(() -> inputSurface)
+                    .build()
+                    .prepare()
+                    .release();
+            mVideoEncoder = new MediaRecorderWrapper.Builder()
+                    .width(() -> width)
+                    .height(() -> height)
+                    .videoBitRate(() -> bitRate)
+                    .outputFile(() -> outputFile)
+                    .inputSurface(() -> inputSurface)
+                    .build()
+                    .prepare()
+                    .startRecording();
+        } catch (IllegalStateException e){
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         mEglCore = new EglCore(sharedContext, EglCore.FLAG_RECORDABLE);
         mInputWindowSurface = new WindowSurface(mEglCore, mVideoEncoder.getInputSurface(), true);
@@ -457,7 +475,7 @@ public class MediaRecorderTextureMovieEncoder implements Runnable {
     }
 
     private void releaseEncoder() {
-        mVideoEncoder.release();
+        mVideoEncoder.releaseMediaRecorder();
         if (mInputWindowSurface != null) {
             mInputWindowSurface.release();
             mInputWindowSurface = null;

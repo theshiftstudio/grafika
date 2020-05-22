@@ -38,8 +38,8 @@ import java.nio.ByteBuffer;
  * This class is not thread-safe, with one exception: it is valid to use the input surface
  * on one thread, and drain the output on a different thread.
  */
-public class VideoEncoderCore {
-    private static final String TAG = VideoEncoderCore.class.getSimpleName();
+public class MuxerVideoEncoderCore {
+    private static final String TAG = MuxerVideoEncoderCore.class.getSimpleName();
     private static final boolean VERBOSE = false;
 
     // TODO: these ought to be configurable as well
@@ -58,7 +58,7 @@ public class VideoEncoderCore {
     /**
      * Configures encoder and muxer state, and prepares the input Surface.
      */
-    public VideoEncoderCore(int width, int height, int bitRate, File outputFile)
+    public MuxerVideoEncoderCore(int width, int height, int bitRate, File outputFile)
             throws IOException {
         mBufferInfo = new MediaCodec.BufferInfo();
 

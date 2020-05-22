@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.android.grafika.record.camerax.CameraXCaptureActivity">
 
-    <androidx.camera.view.RecordCameraView
+    <com.android.grafika.record.view.GLCameraView
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

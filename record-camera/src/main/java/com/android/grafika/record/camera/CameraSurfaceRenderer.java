@@ -284,7 +284,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
         if (VERBOSE) Log.d(TAG, "onDrawFrame tex=" + mTextureId);
-        boolean showBox = false;
 
         // Latch the latest frame.  If there isn't anything new, we'll just re-use whatever
         // was there before.
@@ -341,8 +340,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         mFullScreen.drawFrame(mTextureId, mSTMatrix);
 
         // Draw a flashing box if we're recording.  This only appears on screen.
-        showBox = (mRecordingStatus == RECORDING_ON);
-        if (showBox && (++mFrameCount & 0x04) == 0) {
+        if (VERBOSE && (++mFrameCount & 0x04) == 0) {
             drawBox();
         }
     }

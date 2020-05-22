@@ -50,7 +50,7 @@ public class TextureMovieEncoder2 implements Runnable {
     private static final int MSG_FRAME_AVAILABLE = 2;
 
     // ----- accessed exclusively by encoder thread -----
-    private VideoEncoderCore mVideoEncoder;
+    private MuxerVideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
     private volatile EncoderHandler mHandler;
@@ -68,7 +68,7 @@ public class TextureMovieEncoder2 implements Runnable {
      * <p>
      * Returns after the recorder thread has started and is ready to accept Messages.
      */
-    public TextureMovieEncoder2(VideoEncoderCore encoderCore) {
+    public TextureMovieEncoder2(MuxerVideoEncoderCore encoderCore) {
         Log.d(TAG, "Encoder: startRecording()");
 
         mVideoEncoder = encoderCore;
