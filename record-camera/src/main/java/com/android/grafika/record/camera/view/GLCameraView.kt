@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.android.grafika.record.camera.GLCameraXModule
+import com.android.grafika.videoencoder.VideoEncoderConfig
 import java.io.File
 
 
@@ -57,11 +58,15 @@ class GLCameraView @JvmOverloads constructor(
     }
 
     fun toggleRecording(outputFile: File) {
-        when (previewView.recordingEnabled) {
+        when (previewView.isRecording) {
             false -> previewView.startRecording(outputFile)
             true -> previewView.stopRecording()
         }
     }
+
+    fun startRecording(config: VideoEncoderConfig) = previewView.startRecording(config)
+    fun startRecording(outputFile: File) = previewView.startRecording(outputFile)
+    fun stopRecording() = previewView.stopRecording()
 
     fun flipCameras(lifecycleOwner: LifecycleOwner) {
         when (lensFacing) {

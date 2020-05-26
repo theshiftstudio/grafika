@@ -15,6 +15,7 @@ import com.android.grafika.record.camera.renderer.CameraSurfaceHandler
 import com.android.grafika.record.camera.renderer.CameraSurfaceRenderer
 import com.android.grafika.videoencoder.EncoderStateCallback
 import com.android.grafika.videoencoder.EncoderStateHandler
+import com.android.grafika.videoencoder.VideoEncoderConfig
 import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoder
 import java.io.File
 
@@ -58,7 +59,7 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     private val cameraHandler = CameraSurfaceHandler(this)
     private val renderer = CameraSurfaceRenderer(cameraHandler, videoEncoder)
 
-    val recordingEnabled
+    val isRecording
         get() = videoEncoder.isRecording
 
     override val surfaceTexture: SurfaceTexture?
@@ -94,7 +95,7 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
 
     override fun onResume() {
         super.onResume()
-        if (recordingEnabled) {
+        if (isRecording) {
             resumeRecording()
         }
     }
@@ -134,6 +135,10 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         queueEvent {
             renderer.setCameraPreviewSize(resolution.height, resolution.width)
         }
+    }
+
+    fun startRecording(config: VideoEncoderConfig) = queueEvent {
+        renderer.startRecording(config)
     }
 
 }
