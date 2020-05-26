@@ -10,14 +10,23 @@ import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore
 import java.io.File
 
 class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
-    private var videoBitRate: Int = config?.videoBitRate ?: 1080 * 1000// 1080kbps
-    private var audioBitRate: Int = config?.audioBitRate ?: 128 * 1000 // 128kbps
-    private var frameRate: Int = config?.frameRate ?: 30
-    private var width: Int = config?.width ?: 0
-    private var height: Int = config?.height ?: 0
-    private var outputFile: File? = config?.outputFile
-    private var inputSurface: Surface? = config?.inputSurface
+
+    var videoBitRate: Int = config?.videoBitRate ?: 1080 * 1000// 1080kbps
+        private set
+    var audioBitRate: Int = config?.audioBitRate ?: 128 * 1000 // 128kbps
+        private set
+    var frameRate: Int = config?.frameRate ?: 30
+        private set
+    var width: Int = config?.width ?: 0
+        private set
+    var height: Int = config?.height ?: 0
+        private set
+    var outputFile: File? = config?.outputFile
+        private set
+    var inputSurface: Surface? = config?.inputSurface
+        private set
     var eglContext: EGLContext? = config?.eglContext ?: EGL14.eglGetCurrentContext()
+        private set
 
     fun width(block: () -> Int) = apply {
         this.width = block()
@@ -48,33 +57,11 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
     }
 
     @SuppressLint("RestrictedApi")
-    fun buildMediaRecorderEncoderCore(): MediaRecorderEncoderCore {
-        preconditions()
-        Preconditions.checkNotNull(inputSurface, "inputSurface == null")
-        return MediaRecorderEncoderCore(
-                width, height, videoBitRate, audioBitRate, frameRate, outputFile!!, inputSurface!!
-        )
-    }
-
-    fun buildMuxerVideoEncoderCore(): MuxerVideoEncoderCore {
-        preconditions()
-        return MuxerVideoEncoderCore(width, height, videoBitRate, outputFile!!)
-    }
-
-    fun buildInputSurface(): VideoEncoderConfig = apply {
-        buildMediaRecorderEncoderCore().apply {
-            prepare()
-            release()
-        }
-    }
-
-    @SuppressLint("RestrictedApi")
-    private fun preconditions() {
+    fun preconditions() = apply {
         Preconditions.checkArgument(width != 0, "width == 0")
         Preconditions.checkArgument(height != 0, "height == 0")
         Preconditions.checkNotNull(outputFile, "outputFile == null")
         Preconditions.checkArgument(frameRate > 0, "frameRate <= 0")
     }
-
 
 }

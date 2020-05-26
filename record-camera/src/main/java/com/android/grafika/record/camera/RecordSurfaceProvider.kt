@@ -10,7 +10,7 @@ import androidx.camera.view.preview.transform.PreviewTransform
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
-import com.android.grafika.record.camera.view.PreviewView
+import com.android.grafika.record.camera.view.GLPreviewView
 import com.google.common.util.concurrent.ListenableFuture
 import java.util.concurrent.Executors
 
@@ -18,7 +18,7 @@ import java.util.concurrent.Executors
 class RecordSurfaceProvider<T>(
         private val previewView: T,
         private val previewTransform: PreviewTransform
-) : Preview.SurfaceProvider  where T: PreviewView, T: View {
+) : Preview.SurfaceProvider  where T: GLPreviewView, T: View {
 
     private var surfaceReleaseFuture: ListenableFuture<SurfaceRequest.Result?>? = null
 

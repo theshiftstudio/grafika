@@ -48,7 +48,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     private static final int RECORDING_RESUMED = 2;
     private static final int RECORDING_PAUSED = 3;
 
-    private CameraHandler mCameraHandler;
+    private CameraSurfaceHandler mCameraSurfaceHandler;
     private BaseVideoEncoder mVideoEncoder;
     private VideoEncoderConfig mEncoderConfig;
 
@@ -74,11 +74,11 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
     /**
      * Constructs CameraSurfaceRenderer.
      * <p>
-     * @param cameraHandler Handler for communicating with UI thread
+     * @param cameraSurfaceHandler Handler for communicating with UI thread
      * @param movieEncoder video encoder object
      */
-    public CameraSurfaceRenderer(CameraHandler cameraHandler, BaseVideoEncoder movieEncoder) {
-        mCameraHandler = cameraHandler;
+    public CameraSurfaceRenderer(CameraSurfaceHandler cameraSurfaceHandler, BaseVideoEncoder movieEncoder) {
+        mCameraSurfaceHandler = cameraSurfaceHandler;
         mVideoEncoder = movieEncoder;
 
         mTextureId = -1;
@@ -286,8 +286,8 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
         mSurfaceTexture = new SurfaceTexture(mTextureId);
 
         // Tell the UI thread to enable the camera preview.
-        mCameraHandler.sendMessage(mCameraHandler.obtainMessage(
-                CameraHandler.MSG_SET_SURFACE_TEXTURE, mSurfaceTexture));
+        mCameraSurfaceHandler.sendMessage(mCameraSurfaceHandler.obtainMessage(
+                CameraSurfaceHandler.MSG_SET_SURFACE_TEXTURE, mSurfaceTexture));
     }
 
     @Override
@@ -367,19 +367,16 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
                 // start recording
                 mVideoEncoder.startRecording(mEncoderConfig);
                 mRecordingStatus = RECORDING_ON;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_STARTED));
                 break;
             case RECORDING_PAUSED:
                 Log.d(TAG, "RESUME recording");
                 mVideoEncoder.resumeRecording();
                 mRecordingStatus = RECORDING_ON;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_RESUMED));
                 break;
             case RECORDING_RESUMED:
                 Log.d(TAG, "RESUME recording");
                 mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext());
                 mRecordingStatus = RECORDING_ON;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_RESUMED));
                 break;
             case RECORDING_ON:
                 // yay
@@ -397,7 +394,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
                 Log.d(TAG, "RESUME recording");
                 mVideoEncoder.resumeRecording();
                 mRecordingStatus = RECORDING_ON;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_RESUMED));
                 break;
             case RECORDING_RESUMED:
                 //do nothing
@@ -421,8 +417,7 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
             case RECORDING_ON:
                 mVideoEncoder.pauseRecording();
                 mRecordingStatus = RECORDING_PAUSED;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_PAUSE_SURFACE));
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_PAUSED));
+                mCameraSurfaceHandler.sendMessage(mCameraSurfaceHandler.obtainMessage(CameraSurfaceHandler.MSG_PAUSE_SURFACE));
                 break;
             default:
                 throw new RuntimeException("unknown status " + mRecordingStatus);
@@ -437,7 +432,6 @@ public class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
                 Log.d(TAG, "STOP recording");
                 mVideoEncoder.stopRecording();
                 mRecordingStatus = RECORDING_OFF;
-                mCameraHandler.sendMessage(mCameraHandler.obtainMessage(CameraHandler.MSG_RECORDING_STOPPED));
                 break;
             case RECORDING_PAUSED:
             case RECORDING_OFF:

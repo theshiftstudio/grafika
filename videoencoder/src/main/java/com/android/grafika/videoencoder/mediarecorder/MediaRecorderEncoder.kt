@@ -16,12 +16,11 @@
 package com.android.grafika.videoencoder.mediarecorder
 
 import android.media.MediaCodec
-import android.opengl.EGLContext
 import android.util.Log
 import com.android.grafika.videoencoder.BaseVideoEncoder
 import com.android.grafika.videoencoder.EncoderCore
+import com.android.grafika.videoencoder.EncoderStateHandler
 import com.android.grafika.videoencoder.VideoEncoderConfig
-import java.io.File
 import java.io.IOException
 
 /**
@@ -52,7 +51,9 @@ import java.io.IOException
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-class MediaRecorderVideoEncoder : BaseVideoEncoder(), Runnable {
+class MediaRecorderEncoder(
+        encoderStateHandler: EncoderStateHandler
+) : BaseVideoEncoder(encoderStateHandler), Runnable {
 
     override fun handleFrameAvailable(transform: FloatArray, timestampNanos: Long) {
         if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=$transform")
@@ -65,12 +66,13 @@ class MediaRecorderVideoEncoder : BaseVideoEncoder(), Runnable {
     override fun createEncoder(videoEncoderConfig: VideoEncoderConfig): EncoderCore {
         return videoEncoderConfig
                 .inputSurface { MediaCodec.createPersistentInputSurface() }
-                .buildInputSurface()
-                .buildMediaRecorderEncoderCore()
+                .preconditions()
+                .apply { MediaRecorderEncoderCore(this).apply {
+                    prepare()
+                    release()
+                }}
+                .let { MediaRecorderEncoderCore(it, this) }
                 .prepare()
-                .also {
-                    it.start()
-                    mVideoEncoder = it
-                }
+                .apply { start() }
     }
 }

@@ -25,8 +25,9 @@ import android.util.Log;
 import android.view.Surface;
 
 import com.android.grafika.videoencoder.EncoderCore;
+import com.android.grafika.videoencoder.EncoderStateCallback;
+import com.android.grafika.videoencoder.VideoEncoderConfig;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -55,22 +56,27 @@ public class MuxerVideoEncoderCore implements EncoderCore {
     private MediaCodec.BufferInfo mBufferInfo;
     private int mTrackIndex;
     private boolean mMuxerStarted;
+    private EncoderStateCallback encoderStateCallback;
 
+    public MuxerVideoEncoderCore(VideoEncoderConfig config) throws IOException {
+        this(config, EncoderStateCallback.Companion.getEMPTY());
+    }
 
     /**
      * Configures encoder and muxer state, and prepares the input Surface.
      */
-    public MuxerVideoEncoderCore(int width, int height, int bitRate, File outputFile)
-            throws IOException {
+    public MuxerVideoEncoderCore(VideoEncoderConfig config,
+                                 EncoderStateCallback encoderStateCallback) throws IOException {
         mBufferInfo = new MediaCodec.BufferInfo();
+        this.encoderStateCallback = encoderStateCallback;
 
-        MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, width, height);
+        MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, config.getWidth(), config.getHeight());
 
         // Set some properties.  Failing to specify some of these can cause the MediaCodec
         // configure() call to throw an unhelpful exception.
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                 MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        format.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, config.getVideoBitRate());
         format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
         if (VERBOSE) Log.d(TAG, "format: " + format);
@@ -88,7 +94,7 @@ public class MuxerVideoEncoderCore implements EncoderCore {
         //
         // We're not actually interested in multiplexing audio.  We just want to convert
         // the raw H.264 elementary stream we get from MediaCodec into a .mp4 file.
-        mMuxer = new MediaMuxer(outputFile.toString(),
+        mMuxer = new MediaMuxer(config.getOutputFile().toString(),
                 MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
 
         mTrackIndex = -1;
@@ -108,6 +114,7 @@ public class MuxerVideoEncoderCore implements EncoderCore {
     public void start() {
         if (mMuxer != null) {
             mMuxer.start();
+            encoderStateCallback.onRecordingStarted();
         }
     }
 
@@ -133,10 +140,11 @@ public class MuxerVideoEncoderCore implements EncoderCore {
 
     @Override
     public void pause() {
-        if (mEncoder != null) {
+        if (mEncoder != null && getPauseResumeSupported()) {
             Bundle params = new Bundle();
             params.putInt(MediaCodec.PARAMETER_KEY_SUSPEND, 1);
             mEncoder.setParameters(params);
+            encoderStateCallback.onRecordingPaused();
         }
 //        if (mMuxer != null) {
 //            mMuxer.stop();
@@ -145,10 +153,11 @@ public class MuxerVideoEncoderCore implements EncoderCore {
 
     @Override
     public void resume() {
-        if (mEncoder != null) {
+        if (mEncoder != null && getPauseResumeSupported()) {
             Bundle params = new Bundle();
             params.putInt(MediaCodec.PARAMETER_KEY_SUSPEND, 0);
             mEncoder.setParameters(params);
+            encoderStateCallback.onRecordingResumed();
         }
 //        if (mMuxer != null) {
 //            mMuxer.start();
@@ -247,6 +256,7 @@ public class MuxerVideoEncoderCore implements EncoderCore {
                     } else {
                         if (VERBOSE) Log.d(TAG, "end of stream reached");
                     }
+                    encoderStateCallback.onRecordingStopped();
                     break;      // out of while
                 }
             }
@@ -257,4 +267,5 @@ public class MuxerVideoEncoderCore implements EncoderCore {
     public boolean getPauseResumeSupported() {
         return false;
     }
+
 }

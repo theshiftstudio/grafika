@@ -11,7 +11,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.android.grafika.record.camera.view.GLCameraView
-import com.android.grafika.record.camera.view.PreviewView
+import com.android.grafika.record.camera.view.GLPreviewView
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -33,7 +33,7 @@ class GLCameraXModule(private val cameraView: View) {
             lifecycleOwner: LifecycleOwner,
             previewView: T,
             @CameraSelector.LensFacing lensFacing: Int = CameraSelector.LENS_FACING_FRONT
-    ) where T: PreviewView, T: View = cameraView.post {
+    ) where T: GLPreviewView, T: View = cameraView.post {
         val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(lensFacing)
                 .build()

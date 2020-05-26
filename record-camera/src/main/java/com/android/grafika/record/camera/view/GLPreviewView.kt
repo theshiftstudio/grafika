@@ -5,7 +5,7 @@ import android.util.Size
 import androidx.camera.core.Preview
 
 
-interface PreviewView {
+interface GLPreviewView {
 
     val surfaceTexture: SurfaceTexture?
     val surfaceProvider: Preview.SurfaceProvider

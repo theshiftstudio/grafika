@@ -20,9 +20,11 @@ import android.util.Log;
 
 import com.android.grafika.videoencoder.BaseVideoEncoder;
 import com.android.grafika.videoencoder.EncoderCore;
+import com.android.grafika.videoencoder.EncoderStateHandler;
 import com.android.grafika.videoencoder.VideoEncoderConfig;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Encode a movie from frames rendered from an external texture image.
@@ -51,13 +53,17 @@ import java.io.IOException;
  */
 public class MuxerVideoEncoder extends BaseVideoEncoder {
 
+    public MuxerVideoEncoder(EncoderStateHandler encoderStateHandler) {
+        super(encoderStateHandler);
+    }
+
     @Override
     protected void handleFrameAvailable(float[] transform, long timestampNanos) {
-        if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + transform);
+        if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=" + Arrays.toString(transform));
         mVideoEncoder.drainEncoder(false);
         mFullScreen.drawFrame(mTextureId, transform);
 
-        drawBox(mFrameNum++);
+        if (VERBOSE) drawBox(mFrameNum++);
 
         mInputWindowSurface.setPresentationTime(timestampNanos);
         mInputWindowSurface.swapBuffers();
@@ -66,6 +72,6 @@ public class MuxerVideoEncoder extends BaseVideoEncoder {
     @Override
     protected EncoderCore createEncoder(VideoEncoderConfig config)
             throws IllegalStateException, IOException {
-        return config.buildMuxerVideoEncoderCore();
+        return new MuxerVideoEncoderCore(config, this);
     }
 }

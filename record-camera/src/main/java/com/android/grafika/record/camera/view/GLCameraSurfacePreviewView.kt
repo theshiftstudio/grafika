@@ -10,23 +10,28 @@ import android.view.View
 import androidx.camera.view.PreviewView
 import androidx.camera.view.preview.transform.PreviewTransform
 import com.android.grafika.record.camera.RecordSurfaceProvider
-import com.android.grafika.record.camera.renderer.CameraHandler
+import com.android.grafika.record.camera.renderer.CameraSurfaceCallback
+import com.android.grafika.record.camera.renderer.CameraSurfaceHandler
 import com.android.grafika.record.camera.renderer.CameraSurfaceRenderer
-import com.android.grafika.videoencoder.mediarecorder.MediaRecorderVideoEncoder
+import com.android.grafika.videoencoder.EncoderStateCallback
+import com.android.grafika.videoencoder.EncoderStateHandler
+import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoder
 import java.io.File
 
 
-class GLSurfacePreviewView  @JvmOverloads constructor(
+class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null
 ) : GLSurfaceView(context, attrs),
-        com.android.grafika.record.camera.view.PreviewView,
-        CameraHandler.SurfaceTextureHandler,
+        GLPreviewView,
+        CameraSurfaceCallback,
+        EncoderStateCallback,
         SurfaceTexture.OnFrameAvailableListener {
 
     internal var onRecordingStarted: () -> Unit = { }
     internal var onRecordingResumed: () -> Unit = { }
     internal var onRecordingPaused: () -> Unit = { }
     internal var onRecordingStopped: () -> Unit = { }
+    internal var onRecordingFailed: (Throwable) -> Unit = { }
 
     var onSurfaceTextureAvailable: (SurfaceTexture) -> Unit = { }
 
@@ -48,7 +53,9 @@ class GLSurfacePreviewView  @JvmOverloads constructor(
 
     override val surfaceProvider = RecordSurfaceProvider(this, previewTransform)
 
-    private val cameraHandler = CameraHandler(this)
+    private val encoderStateHandler = EncoderStateHandler(this)
+    private val videoEncoder = MediaRecorderEncoder(encoderStateHandler)
+    private val cameraHandler = CameraSurfaceHandler(this)
     private val renderer = CameraSurfaceRenderer(cameraHandler, videoEncoder)
 
     val recordingEnabled
@@ -79,6 +86,8 @@ class GLSurfacePreviewView  @JvmOverloads constructor(
 
     override fun onRecordingResumed() = this.onRecordingResumed.invoke()
 
+    override fun onRecordingFailed(t: Throwable) = this.onRecordingFailed.invoke(t)
+
     override fun pauseSurface() = Unit
 
     override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) = requestRender()
@@ -93,6 +102,11 @@ class GLSurfacePreviewView  @JvmOverloads constructor(
     override fun onPause() {
         pauseRecording()
         super.onPause()
+    }
+
+    fun onDestroy() {
+        cameraHandler.invalidateHandler()
+        encoderStateHandler.invalidateHandler()
     }
 
     fun startRecording(outputFile: File) = queueEvent {
@@ -120,10 +134,6 @@ class GLSurfacePreviewView  @JvmOverloads constructor(
         queueEvent {
             renderer.setCameraPreviewSize(resolution.height, resolution.width)
         }
-    }
-
-    companion object {
-        private val videoEncoder = MediaRecorderVideoEncoder()
     }
 
 }

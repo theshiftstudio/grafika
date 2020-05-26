@@ -58,7 +58,7 @@ import java.lang.ref.WeakReference;
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-public abstract class BaseVideoEncoder implements Runnable {
+public abstract class BaseVideoEncoder implements Runnable, EncoderStateCallback {
     protected static final String TAG = Utils.TAG;
     protected static final boolean VERBOSE = true;
 
@@ -85,6 +85,11 @@ public abstract class BaseVideoEncoder implements Runnable {
     protected final Object mReadyFence = new Object();      // guards ready/running
     protected boolean mReady;
     protected boolean mRunning;
+    private EncoderStateHandler encoderStateHandler;
+
+    public BaseVideoEncoder(EncoderStateHandler encoderStateHandler) {
+        this.encoderStateHandler = encoderStateHandler;
+    }
 
     /**
      * Tells the video recorder to start recording.  (Call from non-encoder thread.)
@@ -406,5 +411,35 @@ public abstract class BaseVideoEncoder implements Runnable {
         GLES20.glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
+    }
+
+    @Override
+    public void onRecordingStarted() {
+        Message msg = encoderStateHandler.obtainMessage(EncoderStateHandler.MSG_RECORDING_STARTED);
+        encoderStateHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void onRecordingResumed() {
+        Message msg = encoderStateHandler.obtainMessage(EncoderStateHandler.MSG_RECORDING_RESUMED);
+        encoderStateHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void onRecordingPaused() {
+        Message msg = encoderStateHandler.obtainMessage(EncoderStateHandler.MSG_RECORDING_PAUSED);
+        encoderStateHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void onRecordingStopped() {
+        Message msg = encoderStateHandler.obtainMessage(EncoderStateHandler.MSG_RECORDING_STOPPED);
+        encoderStateHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void onRecordingFailed(Throwable t) {
+        Message msg = encoderStateHandler.obtainMessage(EncoderStateHandler.MSG_RECORDING_FAILED, t);
+        encoderStateHandler.sendMessage(msg);
     }
 }

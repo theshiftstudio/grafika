@@ -40,8 +40,10 @@ import com.android.grafika.core.AspectFrameLayout;
 import com.android.grafika.core.CameraUtils;
 import com.android.grafika.core.PermissionHelper;
 import com.android.grafika.core.Utils;
-import com.android.grafika.record.camera.renderer.CameraHandler;
+import com.android.grafika.record.camera.renderer.CameraSurfaceCallback;
+import com.android.grafika.record.camera.renderer.CameraSurfaceHandler;
 import com.android.grafika.record.camera.renderer.CameraSurfaceRenderer;
+import com.android.grafika.videoencoder.EncoderStateHandler;
 import com.android.grafika.videoencoder.muxer.MuxerVideoEncoder;
 
 import java.io.File;
@@ -123,20 +125,20 @@ import java.io.IOException;
  */
 public class CameraCaptureActivity extends Activity
         implements OnItemSelectedListener,
-        CameraHandler.SurfaceTextureHandler, SurfaceTexture.OnFrameAvailableListener {
+        CameraSurfaceCallback, SurfaceTexture.OnFrameAvailableListener {
     private static final String TAG = Utils.TAG;
     private static final boolean VERBOSE = false;
 
     private GLSurfaceView mGLView;
     private CameraSurfaceRenderer mRenderer;
     private Camera mCamera;
-    private CameraHandler mCameraHandler;
+    private CameraSurfaceHandler mCameraSurfaceHandler;
     private boolean mRecordingEnabled;      // controls button state
 
     private int mCameraPreviewWidth, mCameraPreviewHeight;
 
     // this is static so it survives activity restarts
-    private static MuxerVideoEncoder sVideoEncoder = new MuxerVideoEncoder();
+    private static MuxerVideoEncoder sVideoEncoder = new MuxerVideoEncoder(new EncoderStateHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +160,7 @@ public class CameraCaptureActivity extends Activity
         // Define a handler that receives camera-control messages from other threads.  All calls
         // to Camera must be made on the same thread.  Note we create this before the renderer
         // thread, so we know the fully-constructed object will be visible.
-        mCameraHandler = new CameraHandler(this);
+        mCameraSurfaceHandler = new CameraSurfaceHandler(this);
 
         mRecordingEnabled = sVideoEncoder.isRecording();
 
@@ -166,7 +168,7 @@ public class CameraCaptureActivity extends Activity
         // appropriate EGL context.
         mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
         mGLView.setEGLContextClientVersion(2);     // select GLES 2.0
-        mRenderer = new CameraSurfaceRenderer(mCameraHandler, sVideoEncoder);
+        mRenderer = new CameraSurfaceRenderer(mCameraSurfaceHandler, sVideoEncoder);
         mGLView.setRenderer(mRenderer);
         mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
@@ -216,7 +218,7 @@ public class CameraCaptureActivity extends Activity
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
         super.onDestroy();
-        mCameraHandler.invalidateHandler();     // paranoia
+        mCameraSurfaceHandler.invalidateHandler();     // paranoia
     }
 
     @Override
@@ -385,26 +387,6 @@ public class CameraCaptureActivity extends Activity
 
     @Override
     public void pauseSurface() {
-
-    }
-
-    @Override
-    public void onRecordingStarted() {
-
-    }
-
-    @Override
-    public void onRecordingResumed() {
-
-    }
-
-    @Override
-    public void onRecordingPaused() {
-
-    }
-
-    @Override
-    public void onRecordingStopped() {
 
     }
 

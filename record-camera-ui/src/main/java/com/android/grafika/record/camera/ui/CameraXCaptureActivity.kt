@@ -35,6 +35,10 @@ class CameraXCaptureActivity : AppCompatActivity() {
             Log.d(CameraXCaptureActivity::class.java.simpleName, "recording STOPPED!")
             record.isEnabled = true
         }
+        cameraView.onRecordingFailed = {
+            Log.e(CameraXCaptureActivity::class.java.simpleName, "recording FAILED!", it)
+            record.isEnabled = true
+        }
         flip.setOnClickListener {
             cameraView.flipCameras(this)
         }
