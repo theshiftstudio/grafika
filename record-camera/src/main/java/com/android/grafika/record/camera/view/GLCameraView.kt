@@ -20,6 +20,9 @@ class GLCameraView @JvmOverloads constructor(
     @CameraSelector.LensFacing
     private var lensFacing = CameraSelector.LENS_FACING_FRONT
 
+    val isRecording
+        get() = previewView.isRecording
+
     private val cameraXModule = GLCameraXModule(this)
     private val previewView = GLCameraSurfacePreviewView(context).apply {
         layoutParams = LayoutParams(1080, 1920)
@@ -81,6 +84,7 @@ class GLCameraView @JvmOverloads constructor(
             Lifecycle.Event.ON_RESUME -> previewView.onResume()
             Lifecycle.Event.ON_PAUSE -> previewView.onPause()
             Lifecycle.Event.ON_DESTROY -> previewView.onDestroy()
+            else -> Unit
         }
     }
 }
