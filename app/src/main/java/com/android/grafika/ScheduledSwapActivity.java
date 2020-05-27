@@ -16,13 +16,13 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Trace;
-import android.app.Activity;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.Surface;
@@ -30,14 +30,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.GlUtil;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.MiscUtils;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.GlUtil;
+import com.android.grafika.core.gles.WindowSurface;
 
 import java.lang.ref.WeakReference;
 

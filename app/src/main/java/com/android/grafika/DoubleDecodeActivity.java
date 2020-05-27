@@ -16,9 +16,9 @@
 
 package com.android.grafika;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
@@ -111,7 +111,7 @@ public class DoubleDecodeActivity extends Activity {
          */
         public VideoBlob(TextureView view, int movieTag, int ordinal) {
             LTAG = TAG + ordinal;
-            Log.d(LTAG, "VideoBlob: tag=" + movieTag + " view=" + view);
+            Log.d(LTAG, "VideoBlob: tag=" + movieTag + " androidx.camera.view=" + view);
             mMovieTag = movieTag;
 
             mCallback = new SpeedControlCallback();
@@ -121,7 +121,7 @@ public class DoubleDecodeActivity extends Activity {
 
         /**
          * Performs partial construction.  The VideoBlob is already created, but the Activity
-         * was recreated, so we need to update our view.
+         * was recreated, so we need to update our androidx.camera.view.
          */
         public void recreateView(TextureView view) {
             Log.d(LTAG, "recreateView: " + view);

@@ -68,7 +68,6 @@
     <string name="rebindHack_checkbox">rebind</string>
     <string name="hello_world">Hello, world!</string>
     <string name="frameRateLabel">"Frame rate: "</string>
-    <string name="frameRateFormat">"%1$.3f fps (%2$d dropped)"</string>
     <string name="glesVersionLabel">"GLES version: "</string>
     <string name="glesVersionValue">"?"</string>
     <string name="useBlitFramebuffer">Use glBlitFramebuffer() when recording</string>
@@ -100,16 +99,6 @@
     <string name="tfcSizeLabel">Size: </string>
     <string name="tfcRotateLabel">Rotate: </string>
 
-    <!-- for cameraFilter_spinner; match with CameraCaptureActivity constants -->
-    <string-array name="cameraFilterNames">
-        <item>Normal</item>
-        <item>Black &amp; white</item>
-        <item>Filter: blur</item>
-        <item>Filter: sharpen</item>
-        <item>Filter: edge detect</item>
-        <item>Filter: emboss</item>
-    </string-array>
-
     <!-- for scheduledSwapUpdate_spinner; match with UPDATE_PATTERNS -->
     <string-array name="scheduledSwapUpdateNames">
         <item>15 fps</item>
@@ -129,13 +118,11 @@
         <item>3</item>
     </string-array>
 
-    <string name="title_activity_camera_capture">Show + capture camera</string>
     <string name="title_activity_play_movie">Play video (TextureView)</string>
     <string name="title_activity_read_pixels">glReadPixels speed test</string>
     <string name="title_activity_texture_view_gl">Basic GL in TextureView</string>
     <string name="title_activity_texture_view_canvas">Basic Canvas in TextureView</string>
     <string name="title_activity_live_camera">Live camera (TextureView)</string>
-    <string name="title_activity_record_fbo">Record GL app</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_chor_test">ChorTestActivity</string>
     <string name="title_activity_double_decode">Double decode</string>

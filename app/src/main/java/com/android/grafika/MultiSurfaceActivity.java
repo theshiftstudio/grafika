@@ -16,23 +16,23 @@
 
 package com.android.grafika;
 
-import android.opengl.GLES20;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.View;
 import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.opengl.GLES20;
+import android.os.Bundle;
 import android.os.Trace;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.WindowSurface;
 
 /**
  * Exercises some less-commonly-used aspects of SurfaceView.  In particular:
@@ -43,7 +43,7 @@ import com.android.grafika.gles.WindowSurface;
  * </ul>
  * <p>
  * To watch this in systrace, use
- * <code>systrace.py --app=com.android.grafika gfx view sched dalvik</code>
+ * <code>systrace.py --app=com.android.grafika gfx androidx.camera.view sched dalvik</code>
  * (most interesting while bouncing).
  */
 public class MultiSurfaceActivity extends Activity implements SurfaceHolder.Callback {

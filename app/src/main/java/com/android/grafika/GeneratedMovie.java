@@ -23,8 +23,8 @@ import android.media.MediaMuxer;
 import android.util.Log;
 import android.view.Surface;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.WindowSurface;
 
 import java.io.File;
 import java.io.IOException;

@@ -16,6 +16,7 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.media.MediaCodec;
@@ -26,7 +27,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.widget.TextView;
-import android.app.Activity;
 
 import java.io.File;
 import java.io.IOException;

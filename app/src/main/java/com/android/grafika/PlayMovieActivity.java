@@ -16,20 +16,22 @@
 
 package com.android.grafika;
 
-import android.os.Bundle;
 import android.app.Activity;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemSelectedListener;
+
+import com.android.grafika.core.MiscUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +99,7 @@ public class PlayMovieActivity extends Activity implements OnItemSelectedListene
         // after a device rotation.
         //
         // We want to be sure that the player won't continue to send frames after we pause,
-        // because we're tearing the view down.  So we wait for it to stop here.
+        // because we're tearing the androidx.camera.view down.  So we wait for it to stop here.
         if (mPlayTask != null) {
             stopPlayback();
             mPlayTask.waitForStop();
@@ -229,7 +231,7 @@ public class PlayMovieActivity extends Activity implements OnItemSelectedListene
         int xoff = (viewWidth - newWidth) / 2;
         int yoff = (viewHeight - newHeight) / 2;
         Log.v(TAG, "video=" + videoWidth + "x" + videoHeight +
-                " view=" + viewWidth + "x" + viewHeight +
+                " androidx.camera.view=" + viewWidth + "x" + viewHeight +
                 " newView=" + newWidth + "x" + newHeight +
                 " off=" + xoff + "," + yoff);
 

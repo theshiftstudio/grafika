@@ -1,1 +1,6 @@
+include ':record-camera-ui'
+include ':record-camera'
+include ':record-fbo'
+include ':core'
+include ':videoencoder'
 include ':app'

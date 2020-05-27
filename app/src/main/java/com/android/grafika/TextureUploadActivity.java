@@ -16,6 +16,11 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,18 +30,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 
-import com.android.grafika.gles.Drawable2d;
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.GlUtil;
-import com.android.grafika.gles.OffscreenSurface;
-import com.android.grafika.gles.Sprite2d;
-import com.android.grafika.gles.Texture2dProgram;
+import com.android.grafika.core.gles.Drawable2d;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.GlUtil;
+import com.android.grafika.core.gles.OffscreenSurface;
+import com.android.grafika.core.gles.Sprite2d;
+import com.android.grafika.core.gles.Texture2dProgram;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

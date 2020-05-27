@@ -16,6 +16,7 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,14 +25,15 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.app.Activity;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.WindowSurface;
+import com.android.grafika.core.AspectFrameLayout;
+import com.android.grafika.core.MiscUtils;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.WindowSurface;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +64,7 @@ import java.io.IOException;
  * in as arguments.  The Surface provides buffers with a matching size, which means
  * the video data will completely cover the Surface.  As a result, there's no need to
  * use SurfaceHolder#setFixedSize() to set the dimensions.  The hardware scaler will scale
- * the video to match the view size, so if we want to preserve the correct aspect ratio
+ * the video to match the androidx.camera.view size, so if we want to preserve the correct aspect ratio
  * we need to adjust the View layout.  We can use our custom AspectFrameLayout for this.
  * <p>
  * The actual playback of the video -- sending frames to a Surface -- is the same for
@@ -126,7 +128,7 @@ public class PlayMovieSurfaceActivity extends Activity implements OnItemSelected
         // after a device rotation.
         //
         // We want to be sure that the player won't continue to send frames after we pause,
-        // because we're tearing the view down.  So we wait for it to stop here.
+        // because we're tearing the androidx.camera.view down.  So we wait for it to stop here.
         if (mPlayTask != null) {
             stopPlayback();
             mPlayTask.waitForStop();

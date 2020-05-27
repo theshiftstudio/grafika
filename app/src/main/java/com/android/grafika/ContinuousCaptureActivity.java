@@ -16,13 +16,13 @@
 
 package com.android.grafika;
 
+import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
@@ -33,12 +33,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.Activity;
 
-import com.android.grafika.gles.EglCore;
-import com.android.grafika.gles.FullFrameRect;
-import com.android.grafika.gles.Texture2dProgram;
-import com.android.grafika.gles.WindowSurface;
+import androidx.annotation.NonNull;
+
+import com.android.grafika.core.AspectFrameLayout;
+import com.android.grafika.core.CameraUtils;
+import com.android.grafika.core.gles.EglCore;
+import com.android.grafika.core.gles.FullFrameRect;
+import com.android.grafika.core.gles.Texture2dProgram;
+import com.android.grafika.core.gles.WindowSurface;
 
 import java.io.File;
 import java.io.IOException;
