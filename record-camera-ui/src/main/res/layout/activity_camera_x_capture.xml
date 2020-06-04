@@ -9,7 +9,10 @@
     <com.android.grafika.record.camera.view.GLCameraView
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        app:videoFrameRate="20"
+        app:videoPreferredWidth="1080"
+        app:videoPreferredHeight="1920"/>
 
     <Button
         android:id="@+id/flip"

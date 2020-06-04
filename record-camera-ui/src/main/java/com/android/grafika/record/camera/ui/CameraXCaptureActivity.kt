@@ -19,23 +19,23 @@ class CameraXCaptureActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_x_capture)
         cameraView.bindLifecycleOwner(this)
-        cameraView.onRecordingStarted = {
+        cameraView.onRecordingStarted {
             record.isEnabled = true
             Log.d(CameraXCaptureActivity::class.java.simpleName, "recording STARTED!")
         }
-        cameraView.onRecordingPaused = {
+        cameraView.onRecordingPaused {
             record.isEnabled = true
             Log.d(CameraXCaptureActivity::class.java.simpleName, "recording PAUSED!")
         }
-        cameraView.onRecordingResumed = {
+        cameraView.onRecordingResumed {
             record.isEnabled = true
             Log.d(CameraXCaptureActivity::class.java.simpleName, "recording RESUMED!")
         }
-        cameraView.onRecordingStopped = {
+        cameraView.onRecordingStopped {
             Log.d(CameraXCaptureActivity::class.java.simpleName, "recording STOPPED!")
             record.isEnabled = true
         }
-        cameraView.onRecordingFailed = {
+        cameraView.onRecordingFailed {
             Log.e(CameraXCaptureActivity::class.java.simpleName, "recording FAILED!", it)
             record.isEnabled = true
         }

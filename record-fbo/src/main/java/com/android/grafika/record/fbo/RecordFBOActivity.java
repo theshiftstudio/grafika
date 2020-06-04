@@ -46,11 +46,11 @@ import com.android.grafika.core.gles.Sprite2d;
 import com.android.grafika.core.gles.Texture2dProgram;
 import com.android.grafika.core.gles.WindowSurface;
 import com.android.grafika.recordfbo.R;
+import com.android.grafika.videoencoder.EncoderStateCallback;
 import com.android.grafika.videoencoder.VideoEncoderConfig;
 import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -808,16 +808,16 @@ public class RecordFBOActivity extends Activity implements SurfaceHolder.Callbac
                     mVideoRect.width() + "x" + mVideoRect.height());
 
             MuxerVideoEncoderCore encoderCore;
-            try {
+//            try {
                 VideoEncoderConfig config = new VideoEncoderConfig()
                         .width(() -> VIDEO_WIDTH)
                         .height(() -> VIDEO_HEIGHT)
                         .videoBitRate(() -> BIT_RATE)
                         .outputFile(() -> mOutputFile);
-                encoderCore = new MuxerVideoEncoderCore(config);
-            } catch (IOException ioe) {
-                throw new RuntimeException(ioe);
-            }
+                encoderCore = new MuxerVideoEncoderCore(config, EncoderStateCallback.Companion.getEMPTY());
+//            } catch (IOException ioe) {
+//                throw new RuntimeException(ioe);
+//            }
             mInputWindowSurface = new WindowSurface(mEglCore, encoderCore.getInputSurface(), true);
             mVideoEncoder = new TextureMovieEncoder2(encoderCore);
         }

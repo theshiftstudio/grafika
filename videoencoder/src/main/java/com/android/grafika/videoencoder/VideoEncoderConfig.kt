@@ -5,27 +5,25 @@ import android.opengl.EGL14
 import android.opengl.EGLContext
 import android.view.Surface
 import androidx.core.util.Preconditions
-import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoderCore
-import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore
 import java.io.File
 
-class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
+class VideoEncoderConfig {
 
-    var videoBitRate: Int = config?.videoBitRate ?: 1080 * 1000// 1080kbps
+    internal var videoBitRate: Int = 0
         private set
-    var audioBitRate: Int = config?.audioBitRate ?: 128 * 1000 // 128kbps
+    internal var audioBitRate: Int = 0
         private set
-    var frameRate: Int = config?.frameRate ?: 30
+    internal var frameRate: Int = 0
         private set
-    var width: Int = config?.width ?: 0
+    internal var width: Int = 0
         private set
-    var height: Int = config?.height ?: 0
+    internal var height: Int = 0
         private set
-    var outputFile: File? = config?.outputFile
+    internal var outputFile: File? = null
         private set
-    var inputSurface: Surface? = config?.inputSurface
+    internal var inputSurface: Surface? = null
         private set
-    var eglContext: EGLContext? = config?.eglContext ?: EGL14.eglGetCurrentContext()
+    internal var eglContext: EGLContext? = EGL14.eglGetCurrentContext()
         private set
 
     fun width(block: () -> Int) = apply {
@@ -57,11 +55,21 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
     }
 
     @SuppressLint("RestrictedApi")
-    fun preconditions() = apply {
+    internal fun preconditions() = apply {
         Preconditions.checkArgument(width != 0, "width == 0")
         Preconditions.checkArgument(height != 0, "height == 0")
-        Preconditions.checkNotNull(outputFile, "outputFile == null")
         Preconditions.checkArgument(frameRate > 0, "frameRate <= 0")
+        Preconditions.checkArgument(videoBitRate != 0, "height == 0")
+        Preconditions.checkArgument(audioBitRate != 0, "height == 0")
+        Preconditions.checkNotNull(outputFile, "outputFile == null")
+    }
+
+    companion object {
+        const val DEFAULT_VIDEO_BIT_RATE = 1080 * 1000 //1080kbps
+        const val DEFAULT_AUDIO_BIT_RATE = 128 * 1000 //128kbps
+        const val DEFAULT_FRAME_RATE = 30 //30FPS
+        const val DEFAULT_VIDEO_WIDTH = 1080
+        const val DEFAULT_VIDEO_HEIGHT = 1920
     }
 
 }

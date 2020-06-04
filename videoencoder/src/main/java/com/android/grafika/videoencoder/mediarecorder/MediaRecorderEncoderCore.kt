@@ -40,7 +40,7 @@ class MediaRecorderEncoderCore (
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
         mediaRecorder.setInputSurface(inputSurface!!)
-        mediaRecorder.setOnInfoListener { mr, what, extra ->
+        mediaRecorder.setOnInfoListener { _, what, _ ->
             when (what) {
                 MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED,
                 MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED -> stop()

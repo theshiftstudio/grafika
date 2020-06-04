@@ -191,11 +191,7 @@ public class CameraCaptureActivity extends Activity
         }
 
         mGLView.onResume();
-        mGLView.queueEvent(new Runnable() {
-            @Override public void run() {
-                mRenderer.setCameraPreviewSize(mCameraPreviewWidth, mCameraPreviewHeight);
-            }
-        });
+        mGLView.queueEvent(() -> mRenderer.setCameraPreviewSize(mCameraPreviewWidth, mCameraPreviewHeight));
         Log.d(TAG, "onResume complete: " + this);
     }
 

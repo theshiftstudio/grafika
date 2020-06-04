@@ -131,14 +131,10 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     }
 
     override fun setTextureBufferSize(resolution: Size) {
-        renderer.surfaceTexture.setDefaultBufferSize(resolution.width, resolution.height)
+        renderer.surfaceTexture?.setDefaultBufferSize(resolution.width, resolution.height)
         queueEvent {
             renderer.setCameraPreviewSize(resolution.height, resolution.width)
         }
-    }
-
-    fun startRecording(config: VideoEncoderConfig) = queueEvent {
-        renderer.startRecording(config)
     }
 
 }

@@ -35,4 +35,6 @@ dependencies {
   implementation project(":record-camera-ui")
   implementation project(":videoencoder")
   implementation 'androidx.appcompat:appcompat:1.1.0'
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
 }
