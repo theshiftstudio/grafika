@@ -29,7 +29,7 @@ class MediaRecorderEncoderCore (
 
     init {
         Preconditions.checkArgument(inputSurface != null, "inputSurface == null")
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER)
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE)
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         mediaRecorder.setOutputFile(config.outputFile!!.absolutePath)
@@ -38,7 +38,7 @@ class MediaRecorderEncoderCore (
         mediaRecorder.setAudioEncodingBitRate(config.audioBitRate)
         mediaRecorder.setVideoSize(config.width, config.height)
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC_ELD)
         mediaRecorder.setInputSurface(inputSurface!!)
         mediaRecorder.setOnInfoListener { _, what, _ ->
             when (what) {
