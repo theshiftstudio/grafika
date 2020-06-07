@@ -26,8 +26,6 @@ import com.android.grafika.videoencoder.EncoderCore
 import com.android.grafika.videoencoder.EncoderStateCallback
 import com.android.grafika.videoencoder.EncoderStateCallback.Companion.EMPTY
 import com.android.grafika.videoencoder.VideoEncoderConfig
-import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore
-import java.io.IOException
 
 /**
  * This class wraps up the core components used for surface-input video encoding.
@@ -115,10 +113,11 @@ class MuxerVideoEncoderCore(
      * We're just using the muxer to get a .mp4 file (instead of a raw H.264 stream).  We're
      * not recording audio.
      */
-    override fun drainEncoder(endOfStream: Boolean) {
+    @Suppress("DEPRECATION")
+    override fun drainEncoder(endStream: Boolean) {
         val TIMEOUT_USEC = 10000
-        if (VERBOSE) Log.d(TAG, "drainEncoder($endOfStream)")
-        if (endOfStream) {
+        if (VERBOSE) Log.d(TAG, "drainEncoder($endStream)")
+        if (endStream) {
             if (VERBOSE) Log.d(TAG, "sending EOS to encoder")
             mEncoder!!.signalEndOfInputStream()
         }
@@ -127,7 +126,7 @@ class MuxerVideoEncoderCore(
             val encoderStatus = mEncoder!!.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC.toLong())
             if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
                 // no output available yet
-                if (!endOfStream) {
+                if (!endStream) {
                     break // out of while
                 } else {
                     if (VERBOSE) Log.d(TAG, "no output available, spinning to await EOS")
@@ -177,7 +176,7 @@ class MuxerVideoEncoderCore(
                 }
                 mEncoder!!.releaseOutputBuffer(encoderStatus, false)
                 if (mBufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM != 0) {
-                    if (!endOfStream) {
+                    if (!endStream) {
                         Log.w(TAG, "reached end of stream unexpectedly")
                     } else {
                         if (VERBOSE) Log.d(TAG, "end of stream reached")

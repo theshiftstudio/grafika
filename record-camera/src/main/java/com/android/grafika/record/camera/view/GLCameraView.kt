@@ -2,6 +2,8 @@ package com.android.grafika.record.camera.view
 
 import android.content.Context
 import android.graphics.SurfaceTexture
+import android.media.MediaRecorder
+import android.os.Build
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.camera.core.CameraSelector
@@ -10,7 +12,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.android.grafika.record.camera.GLCameraXModule
 import com.android.grafika.record.camera.R
+import com.android.grafika.videoencoder.VideoEncoderConfig
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_BIT_RATE
+import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_ENCODER
+import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_SOURCE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_FRAME_RATE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_BIT_RATE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_HEIGHT
@@ -40,21 +45,60 @@ class GLCameraView @JvmOverloads constructor(
             layoutParams = LayoutParams(videoPreferredWidth, videoPreferredHeight)
         }
     }
-
     private var videoPreferredWidth: Int = DEFAULT_VIDEO_WIDTH
     private var videoPreferredHeight: Int = DEFAULT_VIDEO_HEIGHT
-    private var videoBitRate: Int = DEFAULT_VIDEO_HEIGHT
-    private var videoFrameRate: Int = DEFAULT_VIDEO_HEIGHT
-    private var audioBitRate: Int = DEFAULT_VIDEO_HEIGHT
+    private val encoderConfig = VideoEncoderConfig(VideoEncoderConfig.DEFAULT)
+
+
+    private val audioSourcesMap = mapOf(
+            Pair(0, MediaRecorder.AudioSource.DEFAULT),
+            Pair(1, MediaRecorder.AudioSource.MIC),
+            Pair(2, MediaRecorder.AudioSource.VOICE_UPLINK),
+            Pair(3, MediaRecorder.AudioSource.VOICE_DOWNLINK),
+            Pair(4, MediaRecorder.AudioSource.VOICE_CALL),
+            Pair(5, MediaRecorder.AudioSource.CAMCORDER),
+            Pair(6, MediaRecorder.AudioSource.VOICE_RECOGNITION),
+            Pair(7, MediaRecorder.AudioSource.VOICE_COMMUNICATION),
+            Pair(9, safeAudioSourceUnprocessed()),
+            Pair(10, safeAudioSourceVoicePerformance())
+    )
+
+    private val audioEncodersMap = mapOf(
+            Pair(0, MediaRecorder.AudioEncoder.DEFAULT),
+            Pair(1, MediaRecorder.AudioEncoder.AMR_NB),
+            Pair(2, MediaRecorder.AudioEncoder.AMR_WB),
+            Pair(3, MediaRecorder.AudioEncoder.AAC),
+            Pair(4, MediaRecorder.AudioEncoder.HE_AAC),
+            Pair(5, MediaRecorder.AudioEncoder.AAC_ELD),
+            Pair(6, MediaRecorder.AudioEncoder.VORBIS),
+            Pair(7, safeAudioEncoderOpus())
+    )
 
     init {
         attrs?.let {
             val array = context.obtainStyledAttributes(it, R.styleable.GLCameraView)
             videoPreferredWidth = array.getInteger(R.styleable.GLCameraView_videoPreferredWidth, DEFAULT_VIDEO_WIDTH)
             videoPreferredHeight = array.getInteger(R.styleable.GLCameraView_videoPreferredHeight, DEFAULT_VIDEO_HEIGHT)
-            videoBitRate = array.getInteger(R.styleable.GLCameraView_videoBitRate, DEFAULT_VIDEO_BIT_RATE)
-            videoFrameRate = array.getInteger(R.styleable.GLCameraView_videoFrameRate, DEFAULT_FRAME_RATE)
-            audioBitRate = array.getInteger(R.styleable.GLCameraView_audioBitRate, DEFAULT_AUDIO_BIT_RATE)
+            encoderConfig
+                    .videoBitRate {
+                        array.getInteger(R.styleable.GLCameraView_videoBitRate, DEFAULT_VIDEO_BIT_RATE)
+                    }
+                    .frameRate {
+                        array.getInteger(R.styleable.GLCameraView_videoFrameRate, DEFAULT_FRAME_RATE)
+                    }
+                    .audioBitRate {
+                        array.getInteger(R.styleable.GLCameraView_audioBitRate, DEFAULT_AUDIO_BIT_RATE)
+                    }
+                    .audioSource {
+                        array.getInt(R.styleable.GLCameraView_audioSource, DEFAULT_AUDIO_SOURCE).let {
+                            audioSourcesMap[it] ?: DEFAULT_AUDIO_SOURCE
+                        }
+                    }
+                    .audioEncoder {
+                        array.getInt(R.styleable.GLCameraView_audioEncoder, DEFAULT_AUDIO_ENCODER).let {
+                            audioEncodersMap[it] ?: DEFAULT_AUDIO_ENCODER
+                        }
+                    }
             array.recycle()
         }
         this.addView(previewView, 0)
@@ -72,15 +116,16 @@ class GLCameraView @JvmOverloads constructor(
         }
     }
 
+    fun startRecording(outputFile: File) =
+            previewView.startRecording(encoderConfig.outputFile { outputFile })
+    fun stopRecording() = previewView.stopRecording()
+
     fun toggleRecording(outputFile: File) {
         when (previewView.isRecording) {
-            false -> previewView.startRecording(outputFile)
-            true -> previewView.stopRecording()
+            false -> startRecording(outputFile)
+            true -> stopRecording()
         }
     }
-
-    fun startRecording(outputFile: File) = previewView.startRecording(outputFile)
-    fun stopRecording() = previewView.stopRecording()
 
     fun flipCameras(lifecycleOwner: LifecycleOwner) {
         when (lensFacing) {
@@ -118,4 +163,25 @@ class GLCameraView @JvmOverloads constructor(
             else -> Unit
         }
     }
+
+    private fun safeAudioSourceUnprocessed(): Int =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                MediaRecorder.AudioSource.UNPROCESSED
+            } else {
+                DEFAULT_AUDIO_SOURCE
+            }
+
+    private fun safeAudioSourceVoicePerformance(): Int =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaRecorder.AudioSource.VOICE_PERFORMANCE
+            } else {
+                DEFAULT_AUDIO_SOURCE
+            }
+
+    private fun safeAudioEncoderOpus(): Int =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                MediaRecorder.AudioEncoder.OPUS
+            } else {
+                DEFAULT_AUDIO_ENCODER
+            }
 }

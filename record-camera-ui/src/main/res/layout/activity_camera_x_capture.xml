@@ -12,7 +12,11 @@
         android:layout_height="match_parent"
         app:videoFrameRate="20"
         app:videoPreferredWidth="1080"
-        app:videoPreferredHeight="1920"/>
+        app:videoPreferredHeight="1920"
+        app:audioSource="camcorder"
+        app:audioEncoder="aac_eld"
+        app:videoBitRate="1080000"
+        app:audioBitRate="128000"/>
 
     <Button
         android:id="@+id/flip"

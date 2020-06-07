@@ -67,40 +67,15 @@ class CameraSurfaceRenderer(
             mFullScreen = null //  to be destroyed
         }
         mIncomingHeight = -1
-        mIncomingWidth = mIncomingHeight
+        mIncomingWidth = -1
     }
 
     @SuppressLint("RestrictedApi")
-    fun startRecording(outputFile: File) {
-        startRecording(outputFile, VideoEncoderConfig.DEFAULT_VIDEO_BIT_RATE)
-    }
-
-    @SuppressLint("RestrictedApi")
-    fun startRecording(outputFile: File, videoBitRate: Int) {
-        startRecording(outputFile,
-                videoBitRate,
-                VideoEncoderConfig.DEFAULT_AUDIO_BIT_RATE,
-                VideoEncoderConfig.DEFAULT_FRAME_RATE
-        )
-    }
-
-    @SuppressLint("RestrictedApi")
-    fun startRecording(outputFile: File, videoBitRate: Int, audioBitRate: Int) {
-        startRecording(outputFile, videoBitRate, audioBitRate,
-                VideoEncoderConfig.DEFAULT_FRAME_RATE
-        )
-    }
-
-    @SuppressLint("RestrictedApi")
-    fun startRecording(outputFile: File, videoBitRate: Int, audioBitRate: Int, frameRate: Int) {
+    fun startRecording(encoderConfig: VideoEncoderConfig) {
         Threads.checkBackgroundThread()
-        mEncoderConfig = VideoEncoderConfig()
+        mEncoderConfig = VideoEncoderConfig(encoderConfig)
                 .width { mIncomingWidth }
                 .height { mIncomingHeight }
-                .videoBitRate { videoBitRate }
-                .audioBitRate { audioBitRate }
-                .frameRate { frameRate }
-                .outputFile { outputFile }
         mRequestRecordingStatus = RECORDING_ON
     }
 
@@ -125,16 +100,6 @@ class CameraSurfaceRenderer(
         }
         mRequestRecordingStatus = RECORDING_OFF
         mEncoderConfig = null
-    }
-
-    private fun baseConfigBuilder(outputFile: File): VideoEncoderConfig {
-        return VideoEncoderConfig()
-                .width { mIncomingWidth }
-                .height { mIncomingHeight }
-                .audioBitRate { VideoEncoderConfig.DEFAULT_AUDIO_BIT_RATE }
-                .videoBitRate { VideoEncoderConfig.DEFAULT_VIDEO_BIT_RATE }
-                .frameRate { VideoEncoderConfig.DEFAULT_FRAME_RATE }
-                .outputFile { outputFile }
     }
 
     /**

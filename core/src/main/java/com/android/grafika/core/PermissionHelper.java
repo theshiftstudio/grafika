@@ -59,11 +59,29 @@ public class PermissionHelper {
 
         // No explanation needed, we can request the permission.
 
-      String permissions[] = requestWritePermission ? new String[]{Manifest.permission.CAMERA,
+      String[] permissions = requestWritePermission ? new String[]{Manifest.permission.CAMERA,
               Manifest.permission.WRITE_EXTERNAL_STORAGE}: new String[]{Manifest.permission.CAMERA};
         ActivityCompat.requestPermissions(activity,permissions,RC_PERMISSION_REQUEST);
       }
+  }
+
+  public static void requestCameraAndAudioPermission(Activity activity) {
+
+    boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(activity,
+            Manifest.permission.CAMERA)
+            || ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                    Manifest.permission.RECORD_AUDIO);
+    if (showRationale) {
+      Toast.makeText(activity,
+              "Camera & audio permissions are needed to run this application", Toast.LENGTH_LONG).show();
+    } else {
+
+      // No explanation needed, we can request the permission.
+
+      String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
+      ActivityCompat.requestPermissions(activity,permissions,RC_PERMISSION_REQUEST);
     }
+  }
 
   public static void requestWriteStoragePermission(Activity activity) {
     boolean showRationale = ActivityCompat.shouldShowRequestPermissionRationale(activity,

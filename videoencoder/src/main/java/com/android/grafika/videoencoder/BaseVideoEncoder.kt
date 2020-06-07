@@ -329,14 +329,14 @@ abstract class BaseVideoEncoder(
         Log.d(TAG, "handleUpdatedSharedContext $newSharedContext")
 
         // Release the EGLSurface and EGLContext.
-        inputWindowSurface!!.releaseEglSurface()
-        fullScreen!!.release(false)
-        eglCore!!.release()
+        inputWindowSurface?.releaseEglSurface()
+        fullScreen?.release(false)
+        eglCore?.release()
 
         // Create a new EGLContext and recreate the window surface.
         eglCore = EglCore(newSharedContext, EglCore.FLAG_RECORDABLE)
-        inputWindowSurface!!.recreate(eglCore)
-        inputWindowSurface!!.makeCurrent()
+        inputWindowSurface?.recreate(eglCore)
+        inputWindowSurface?.makeCurrent()
 
         // Create new programs and such for the new context.
         fullScreen = FullFrameRect(

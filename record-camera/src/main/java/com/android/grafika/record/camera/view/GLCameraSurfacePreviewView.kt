@@ -110,8 +110,8 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         encoderStateHandler.invalidateHandler()
     }
 
-    fun startRecording(outputFile: File) = queueEvent {
-        renderer.startRecording(outputFile)
+    fun startRecording(encoderConfig: VideoEncoderConfig) = queueEvent {
+        renderer.startRecording(encoderConfig)
     }
 
     private fun resumeRecording() = queueEvent {

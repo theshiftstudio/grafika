@@ -6,5 +6,75 @@
         <attr name="videoBitRate" format="integer"/>
         <attr name="videoFrameRate" format="integer"/>
         <attr name="audioBitRate" format="integer"/>
+        <attr name="audioSource" format="enum">
+            <!--"Default audio source"-->
+            <enum name="default_value" value="0"/>
+            <!--"Microphone audio source"-->
+            <enum name="mic" value="1"/>
+            <!-- Voice call uplink (Tx) audio source.
+            <p>
+            Capturing from <code>VOICE_UPLINK</code> source requires the
+            {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+            This permission is reserved for use by system components and is not available to
+            third-party applications.
+            </p> -->
+            <enum name="voice_uplink" value="2"/>
+            <!-- Voice call downlink (Rx) audio source.
+            <p>
+            Capturing from <code>VOICE_DOWNLINK</code> source requires the
+            {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+            This permission is reserved for use by system components and is not available to
+            third-party applications.
+            </p> -->
+            <enum name="voice_downlink" value="3"/>
+            <!-- Voice call uplink + downlink audio source
+            <p>
+            Capturing from <code>VOICE_CALL</code> source requires the
+            {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+            This permission is reserved for use by system components and is not available to
+            third-party applications.
+            </p> -->
+            <enum name="voice_call" value="4"/>
+            <!-- Microphone audio source tuned for video recording, with the same orientation
+            as the camera if available. -->
+            <enum name="camcorder" value="5"/>
+            <!-- Microphone audio source tuned for voice recognition. -->
+            <enum name="voice_recognition" value="6"/>
+            <!-- Microphone audio source tuned for voice communications such as VoIP. It
+            will for instance take advantage of echo cancellation or automatic gain control
+            if available. -->
+            <enum name="voice_communication" value="7"/>
+            <!-- Requires API 24! If API < 24, defaults to camcorder
+            Microphone audio source tuned for unprocessed (raw) sound if available, behaves like
+            {@link #DEFAULT} otherwise. -->
+            <enum name="unprocessed" value="9"/>
+            <!-- Requires API 29! If API < 29, defaults to camcorder
+            Source for capturing audio meant to be processed in real time and played back for live
+            performance (e.g karaoke).
+            <p>
+            The capture path will minimize latency and coupling with
+            playback path.
+            </p> -->
+            <enum name="voice_performance" value="10"/>
+        </attr>
+        <attr name="audioEncoder" format="enum">
+            <!-- Default audio codec -->
+            <enum name="default_value" value="0"/>
+            <!-- AMR (Narrowband) audio codec -->
+            <enum name="amr_nb" value="1"/>
+            <!-- AMR (Wideband) audio codec -->
+            <enum name="amr_wb" value="2"/>
+            <!-- AAC Low Complexity (AAC-LC) audio codec -->
+            <enum name="aac" value="3"/>
+            <!-- High Efficiency AAC (HE-AAC) audio codec -->
+            <enum name="he_aac" value="4"/>
+            <!-- Enhanced Low Delay AAC (AAC-ELD) audio codec -->
+            <enum name="aac_eld" value="5"/>
+            <!-- Ogg Vorbis audio codec (Support is optional) -->
+            <enum name="vorbis" value="6"/>
+            <!-- Requires API 29! If API < 29, defaults to aac_edl
+            Opus audio codec -->
+            <enum name="opus" value="7"/>
+        </attr>
     </declare-styleable>
 </resources>

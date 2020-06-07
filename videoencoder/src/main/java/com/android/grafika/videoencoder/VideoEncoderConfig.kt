@@ -1,30 +1,34 @@
 package com.android.grafika.videoencoder
 
 import android.annotation.SuppressLint
+import android.media.MediaRecorder
 import android.opengl.EGL14
 import android.opengl.EGLContext
 import android.view.Surface
 import androidx.core.util.Preconditions
 import java.io.File
 
-class VideoEncoderConfig {
+class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
 
-    internal var videoBitRate: Int = 0
+    var videoBitRate: Int = config?.videoBitRate ?: 0
         private set
-    internal var audioBitRate: Int = 0
+    var audioBitRate: Int = config?.audioBitRate ?: 0
         private set
-    internal var frameRate: Int = 0
+    var frameRate: Int = config?.frameRate ?: 0
         private set
-    internal var width: Int = 0
+    var width: Int = config?.width ?: 0
         private set
-    internal var height: Int = 0
+    var height: Int = config?.height ?: 0
         private set
-    internal var outputFile: File? = null
+    var outputFile: File? = config?.outputFile
         private set
-    internal var inputSurface: Surface? = null
+    internal var inputSurface: Surface? = config?.inputSurface
         private set
     internal var eglContext: EGLContext? = EGL14.eglGetCurrentContext()
         private set
+    var audioSource: Int = config?.audioSource ?: -1
+        private set
+    var audioEncoder: Int = config?.audioEncoder ?: -1
 
     fun width(block: () -> Int) = apply {
         this.width = block()
@@ -54,6 +58,14 @@ class VideoEncoderConfig {
         this.inputSurface = block()
     }
 
+    fun audioSource(block: () -> Int) = apply {
+        this.audioSource = block()
+    }
+
+    fun audioEncoder(block: () -> Int) = apply {
+        this.audioEncoder = block()
+    }
+
     @SuppressLint("RestrictedApi")
     internal fun preconditions() = apply {
         Preconditions.checkArgument(width != 0, "width == 0")
@@ -61,6 +73,10 @@ class VideoEncoderConfig {
         Preconditions.checkArgument(frameRate > 0, "frameRate <= 0")
         Preconditions.checkArgument(videoBitRate != 0, "height == 0")
         Preconditions.checkArgument(audioBitRate != 0, "height == 0")
+        Preconditions.checkArgument(audioSource != -1, "audioSource invalid:" +
+                "must be a value from `MediaRecorder.AudioSource`")
+        Preconditions.checkArgument(audioEncoder != -1, "audioEncoder invalid:" +
+                "must be a value from `MediaRecorder.AudioEncoder`")
         Preconditions.checkNotNull(outputFile, "outputFile == null")
     }
 
@@ -70,6 +86,16 @@ class VideoEncoderConfig {
         const val DEFAULT_FRAME_RATE = 30 //30FPS
         const val DEFAULT_VIDEO_WIDTH = 1080
         const val DEFAULT_VIDEO_HEIGHT = 1920
+        const val DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.CAMCORDER
+        const val DEFAULT_AUDIO_ENCODER = MediaRecorder.AudioEncoder.AAC_ELD
+        val DEFAULT = VideoEncoderConfig()
+                .width { DEFAULT_VIDEO_WIDTH }
+                .height { DEFAULT_VIDEO_HEIGHT }
+                .videoBitRate { DEFAULT_VIDEO_BIT_RATE }
+                .audioBitRate { DEFAULT_VIDEO_BIT_RATE }
+                .frameRate { DEFAULT_FRAME_RATE }
+                .audioSource { DEFAULT_AUDIO_SOURCE }
+                .audioEncoder { DEFAULT_AUDIO_ENCODER }
     }
 
 }
