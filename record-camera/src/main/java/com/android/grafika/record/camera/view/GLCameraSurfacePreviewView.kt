@@ -17,7 +17,6 @@ import com.android.grafika.videoencoder.EncoderStateCallback
 import com.android.grafika.videoencoder.EncoderStateHandler
 import com.android.grafika.videoencoder.VideoEncoderConfig
 import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoder
-import java.io.File
 
 
 class GLCameraSurfacePreviewView  @JvmOverloads constructor(
@@ -65,6 +64,8 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     override val surfaceTexture: SurfaceTexture?
         get() = renderer.surfaceTexture
 
+    internal var cameraAvailable = false
+
     init {
         this.preserveEGLContextOnPause = true
         this.setEGLContextClientVersion(2)
@@ -79,15 +80,33 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         }
     }
 
-    override fun onRecordingPaused() = this.onRecordingPaused.invoke()
+    override fun onRecordingPaused(){
+        if (cameraAvailable) {
+            this.onRecordingPaused.invoke()
+        }
+    }
 
-    override fun onRecordingStopped() = this.onRecordingStopped.invoke()
+    override fun onRecordingStopped(){
+        if (cameraAvailable) {
+            this.onRecordingStopped.invoke()
+        }
+    }
 
-    override fun onRecordingStarted() = this.onRecordingStarted.invoke()
+    override fun onRecordingStarted(){
+        if (cameraAvailable) {
+            this.onRecordingStarted.invoke()
+        }
+    }
 
-    override fun onRecordingResumed() = this.onRecordingResumed.invoke()
+    override fun onRecordingResumed(){
+        if (cameraAvailable) {
+            this.onRecordingResumed.invoke()
+        }
+    }
 
-    override fun onRecordingFailed(t: Throwable) = this.onRecordingFailed.invoke(t)
+    override fun onRecordingFailed(t: Throwable){
+        this.onRecordingFailed.invoke(t)
+    }
 
     override fun pauseSurface() = Unit
 
@@ -110,24 +129,46 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         encoderStateHandler.invalidateHandler()
     }
 
-    fun startRecording(encoderConfig: VideoEncoderConfig) = queueEvent {
-        renderer.startRecording(encoderConfig)
+    fun startRecording(encoderConfig: VideoEncoderConfig) {
+        if (cameraAvailable) {
+            queueEvent {
+                renderer.startRecording(encoderConfig)
+            }
+        } else {
+            onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
+        }
     }
 
-    private fun resumeRecording() = queueEvent {
-        renderer.resumeRecoding()
+    private fun resumeRecording(){
+        if (cameraAvailable) {
+            queueEvent {
+                renderer.resumeRecoding()
+            }
+        } else {
+            onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
+        }
     }
 
     private fun pauseRecording() {
-        queueEvent {
-            renderer.pauseRecording()
-            renderer.handleRequestRecordingPause()
+        if (cameraAvailable) {
+            queueEvent {
+                renderer.pauseRecording()
+                renderer.handleRequestRecordingPause()
+            }
+        } else {
+            onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
         }
     }
 
 
-    fun stopRecording() = queueEvent {
-        renderer.stopRecording()
+    fun stopRecording() {
+        if (cameraAvailable) {
+            queueEvent {
+                renderer.stopRecording()
+            }
+        } else {
+            onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
+        }
     }
 
     override fun setTextureBufferSize(resolution: Size) {

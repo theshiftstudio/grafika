@@ -1,7 +1,6 @@
 package com.android.grafika.record.camera.view
 
 import android.content.Context
-import android.graphics.SurfaceTexture
 import android.media.MediaRecorder
 import android.os.Build
 import android.util.AttributeSet
@@ -25,7 +24,7 @@ import java.io.File
 
 class GLCameraView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null
-) : FrameLayout(context, attrs), SurfaceTexture.OnFrameAvailableListener, LifecycleEventObserver {
+) : FrameLayout(context, attrs), LifecycleEventObserver {
 
     @CameraSelector.LensFacing
     private var lensFacing = CameraSelector.LENS_FACING_FRONT
@@ -104,12 +103,20 @@ class GLCameraView @JvmOverloads constructor(
         this.addView(previewView, 0)
     }
 
-    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) = previewView.requestRender()
+    fun unbindUseCases() {
+        if (isRecording) {
+            stopRecording()
+        }
+        cameraXModule.unbindUseCases {
+            previewView.cameraAvailable = false
+        }
+    }
 
     fun bindLifecycleOwner(lifecycleOwner: LifecycleOwner) {
         lifecycleOwner.lifecycle.addObserver(this)
         previewView.onSurfaceTextureAvailable = {
             cameraXModule.bindToLifecycle(lifecycleOwner, previewView)
+            previewView.cameraAvailable = true
         }
         previewView.surfaceTexture?.let {
             previewView.onSurfaceTextureAvailable(it)
@@ -153,6 +160,11 @@ class GLCameraView @JvmOverloads constructor(
 
     fun onRecordingFailed(block: (Throwable) -> Unit) = apply {
         previewView.onRecordingFailed = block
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        previewView.onDestroy()
     }
 
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {

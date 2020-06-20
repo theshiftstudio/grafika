@@ -1,6 +1,7 @@
 package com.android.grafika.record.camera
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
@@ -60,6 +61,16 @@ class GLCameraXModule(private val cameraView: View) {
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
+        }, ContextCompat.getMainExecutor(cameraView.context))
+    }
+
+    fun unbindUseCases(block: () -> Unit) {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
+        cameraProviderFuture.addListener(Runnable {
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            // Must unbind the use-cases before rebinding them
+            cameraProvider.unbindAll()
+            block()
         }, ContextCompat.getMainExecutor(cameraView.context))
     }
 

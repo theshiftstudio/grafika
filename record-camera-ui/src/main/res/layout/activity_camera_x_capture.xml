@@ -33,4 +33,12 @@
         android:layout_alignParentEnd="true"
         android:layout_above="@id/flip"
         android:text="Rec"/>
+
+    <ToggleButton
+        android:id="@+id/power"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@id/record"
+        android:checked="true"/>
 </RelativeLayout>
