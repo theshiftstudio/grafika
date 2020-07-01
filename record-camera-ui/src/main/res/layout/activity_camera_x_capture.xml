@@ -14,9 +14,8 @@
         app:videoPreferredWidth="1080"
         app:videoPreferredHeight="1920"
         app:audioSource="camcorder"
-        app:audioEncoder="aac_eld"
-        app:videoBitRate="1080000"
-        app:audioBitRate="128000"/>
+        app:audioEncoder="aac"
+        app:videoBitRate="1080000"/>
 
     <Button
         android:id="@+id/flip"

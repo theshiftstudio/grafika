@@ -19,6 +19,7 @@ import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_FRA
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_BIT_RATE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_HEIGHT
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_WIDTH
+import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.NULL_VALUE
 import java.io.File
 
 
@@ -86,7 +87,7 @@ class GLCameraView @JvmOverloads constructor(
                         array.getInteger(R.styleable.GLCameraView_videoFrameRate, DEFAULT_FRAME_RATE)
                     }
                     .audioBitRate {
-                        array.getInteger(R.styleable.GLCameraView_audioBitRate, DEFAULT_AUDIO_BIT_RATE)
+                        array.getInteger(R.styleable.GLCameraView_audioBitRate, NULL_VALUE)
                     }
                     .audioSource {
                         array.getInt(R.styleable.GLCameraView_audioSource, DEFAULT_AUDIO_SOURCE).let {

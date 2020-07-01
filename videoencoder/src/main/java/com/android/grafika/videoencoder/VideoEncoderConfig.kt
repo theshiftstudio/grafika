@@ -42,6 +42,13 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
         this.videoBitRate = block()
     }
 
+    /**
+     * Be careful with setting the audio bit rate. it depends on the audio encoder codec
+     * and a wrong value may produce audio stuttering on different devices.
+     *
+     * If you don't know what you're doing, like me,
+     * let MediaRecorder pick an audioBitRate.
+     */
     fun audioBitRate(block: () -> Int) = apply {
         this.audioBitRate = block()
     }
@@ -81,6 +88,7 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
     }
 
     companion object {
+        const val NULL_VALUE = -1
         const val DEFAULT_VIDEO_BIT_RATE = 1080 * 1000 //1080kbps
         const val DEFAULT_AUDIO_BIT_RATE = 128 * 1000 //128kbps
         const val DEFAULT_FRAME_RATE = 30 //30FPS
@@ -92,7 +100,7 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
                 .width { DEFAULT_VIDEO_WIDTH }
                 .height { DEFAULT_VIDEO_HEIGHT }
                 .videoBitRate { DEFAULT_VIDEO_BIT_RATE }
-                .audioBitRate { DEFAULT_VIDEO_BIT_RATE }
+                .audioBitRate { NULL_VALUE }
                 .frameRate { DEFAULT_FRAME_RATE }
                 .audioSource { DEFAULT_AUDIO_SOURCE }
                 .audioEncoder { DEFAULT_AUDIO_ENCODER }
