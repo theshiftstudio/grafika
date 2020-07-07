@@ -2,12 +2,16 @@ package com.android.grafika.record.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
+import androidx.camera.core.impl.LensFacingCameraFilter
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
@@ -19,6 +23,10 @@ import kotlin.math.min
 
 
 class GLCameraXModule(private val cameraView: View) {
+
+    private val cameraManager by lazy {
+        cameraView.context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+    }
 
     private val screenAspectRatio by lazy {
         // Get screen metrics used to setup camera for full screen resolution
@@ -36,7 +44,13 @@ class GLCameraXModule(private val cameraView: View) {
             @CameraSelector.LensFacing lensFacing: Int = CameraSelector.LENS_FACING_FRONT
     ) where T: GLPreviewView, T: View = cameraView.post {
         val cameraSelector = CameraSelector.Builder()
-                .requireLensFacing(lensFacing)
+                .appendFilter { cameras ->
+                    getFirstCameraIdFacing(cameraManager, lensFacing)?.let { cameraId ->
+                        cameras.filter {
+                            it.cameraInfoInternal.cameraId == cameraId
+                        }.toSet()
+                    } ?: LensFacingCameraFilter(lensFacing).filterCameras(cameras)
+                }
                 .build()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
         cameraProviderFuture.addListener(Runnable {
@@ -64,6 +78,28 @@ class GLCameraXModule(private val cameraView: View) {
         }, ContextCompat.getMainExecutor(cameraView.context))
     }
 
+    private fun getFirstCameraIdFacing(
+            cameraManager: CameraManager,
+            facing: Int = CameraSelector.LENS_FACING_FRONT
+    ): String? {
+        // Get list of all compatible cameras
+        val cameraIds = cameraManager.cameraIdList.filter {
+            cameraManager.getCameraCharacteristics(it).supportsRgb()
+        }
+
+        val metadataFacing = when (facing) {
+            CameraSelector.LENS_FACING_FRONT -> CameraMetadata.LENS_FACING_FRONT
+            CameraSelector.LENS_FACING_BACK -> CameraMetadata.LENS_FACING_BACK
+            else -> CameraMetadata.LENS_FACING_FRONT
+        }
+        // Iterate over the list of cameras and return the first one matching desired
+        // lens-facing configuration
+        return cameraIds.firstOrNull {
+            cameraManager.getCameraCharacteristics(it)[CameraCharacteristics.LENS_FACING] == metadataFacing
+        }
+        // If no camera matched desired orientation, return the first one from the list
+    }
+
     fun unbindUseCases(block: () -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
         cameraProviderFuture.addListener(Runnable {
@@ -89,3 +125,8 @@ class GLCameraXModule(private val cameraView: View) {
         private const val RATIO_16_9_VALUE = 16.0 / 9.0
     }
 }
+
+fun CameraCharacteristics.supportsRgb() : Boolean =
+        this[CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES]
+                ?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)
+                ?: false
