@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/audio_debugger"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:layout_marginBottom="4dp">
+    <RadioGroup
+        android:id="@+id/audio_debugger_encoder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="Audio Encoder"/>
+        <RadioButton
+            android:id="@+id/audio_debuger_encoder_aac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+
+            android:text="AAC"/>
+        <RadioButton
+            android:id="@+id/audio_debuger_encoder_aac_he"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+
+            android:text="AAC_HE"/>
+        <RadioButton
+            android:id="@+id/audio_debuger_encoder_aac_eld"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+
+            android:text="AAC_ELD"/>
+    </RadioGroup>
+
+    <RadioGroup
+        android:id="@+id/audio_debugger_bitrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="Audio Bitrate"/>
+        <RadioButton
+            android:id="@+id/audio_debugger_bitrate_8khz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="8kHz"/>
+        <RadioButton
+            android:id="@+id/audio_debugger_bitrate_24khz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="24kHz"/>
+        <RadioButton
+            android:id="@+id/audio_debugger_bitrate_48khz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="48kHz"/>
+    </RadioGroup>
+</LinearLayout>

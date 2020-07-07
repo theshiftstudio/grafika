@@ -90,12 +90,12 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
     companion object {
         const val NULL_VALUE = -1
         const val DEFAULT_VIDEO_BIT_RATE = 1080 * 1000 //1080kbps
-        const val DEFAULT_AUDIO_BIT_RATE = 128 * 1000 //128kbps
+        const val DEFAULT_AUDIO_BIT_RATE = 24 * 1000 //48kbps
         const val DEFAULT_FRAME_RATE = 30 //30FPS
         const val DEFAULT_VIDEO_WIDTH = 1080
         const val DEFAULT_VIDEO_HEIGHT = 1920
         const val DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.CAMCORDER
-        const val DEFAULT_AUDIO_ENCODER = MediaRecorder.AudioEncoder.AAC_ELD
+        const val DEFAULT_AUDIO_ENCODER = MediaRecorder.AudioEncoder.HE_AAC
         val DEFAULT = VideoEncoderConfig()
                 .width { DEFAULT_VIDEO_WIDTH }
                 .height { DEFAULT_VIDEO_HEIGHT }
