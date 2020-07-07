@@ -4,7 +4,10 @@ import android.content.Context
 import android.media.MediaRecorder
 import android.os.Build
 import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
+import android.widget.RadioGroup
 import androidx.camera.core.CameraSelector
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -27,6 +30,14 @@ class GLCameraView @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs), LifecycleEventObserver {
 
+    private var audioDebugger: View? = null
+    private val audioDebuggerEncoder by lazy {
+        audioDebugger?.findViewById<RadioGroup?>(R.id.audio_debugger)
+    }
+    private val audioDebuggerBitRate by lazy {
+        audioDebugger?.findViewById<RadioGroup?>(R.id.audio_debugger_bitrate)
+    }
+
     @CameraSelector.LensFacing
     private var lensFacing = CameraSelector.LENS_FACING_FRONT
 
@@ -38,6 +49,18 @@ class GLCameraView @JvmOverloads constructor(
 
     val previewHeight
         get() = previewView.height
+
+    var videoBitRate
+        get() = encoderConfig.videoBitRate
+        set(value) { encoderConfig.videoBitRate { value } }
+
+    var audioBitRate
+        get() = encoderConfig.audioBitRate
+        set(value) { encoderConfig.audioBitRate { value } }
+
+    var audioEncoder
+        get() = encoderConfig.audioEncoder
+        set(value) { encoderConfig.audioEncoder { value } }
 
     private val cameraXModule = GLCameraXModule(this)
     private val previewView by lazy {
@@ -99,9 +122,30 @@ class GLCameraView @JvmOverloads constructor(
                             audioEncodersMap[it] ?: DEFAULT_AUDIO_ENCODER
                         }
                     }
+            audioDebugger = array.getBoolean(R.styleable.GLCameraView_debugAudio, false)
+                    .takeIf { it }
+                    ?.let {
+                        LayoutInflater.from(context).inflate(R.layout.view_audio_debugger, this, false)
+                    }.apply {
+                        audioDebuggerEncoder?.setOnCheckedChangeListener { _, checkedId ->
+                            when (checkedId) {
+                                R.id.audio_debuger_encoder_aac -> audioEncoder = MediaRecorder.AudioEncoder.AAC
+                                R.id.audio_debuger_encoder_aac_he -> audioEncoder = MediaRecorder.AudioEncoder.HE_AAC
+                                R.id.audio_debuger_encoder_aac_eld -> audioEncoder = MediaRecorder.AudioEncoder.AAC_ELD
+                            }
+                        }
+                        audioDebuggerBitRate?.setOnCheckedChangeListener { _, checkedId ->
+                            when (checkedId) {
+                                R.id.audio_debugger_bitrate_8khz -> audioBitRate = 8 * 1000
+                                R.id.audio_debugger_bitrate_24khz -> audioBitRate = 24 * 1000
+                                R.id.audio_debugger_bitrate_48khz -> audioBitRate = 48 * 1000
+                            }
+                        }
+                    }
             array.recycle()
         }
         this.addView(previewView, 0)
+        audioDebugger?.let { addView(it) }
     }
 
     fun unbindUseCases() {

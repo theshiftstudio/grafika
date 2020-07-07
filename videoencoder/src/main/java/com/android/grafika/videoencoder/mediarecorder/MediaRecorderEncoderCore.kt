@@ -56,7 +56,6 @@ class MediaRecorderEncoderCore (
     }
 
     override fun release() {
-        mediaRecorder.reset()
         mediaRecorder.release()
         isRecording = false
     }

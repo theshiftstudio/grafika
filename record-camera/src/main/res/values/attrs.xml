@@ -76,5 +76,6 @@
             Opus audio codec -->
             <enum name="opus" value="7"/>
         </attr>
+        <attr name="debugAudio" format="boolean"/>
     </declare-styleable>
 </resources>
