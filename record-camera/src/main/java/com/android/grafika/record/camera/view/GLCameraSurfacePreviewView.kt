@@ -17,10 +17,13 @@ import com.android.grafika.videoencoder.EncoderStateCallback
 import com.android.grafika.videoencoder.EncoderStateHandler
 import com.android.grafika.videoencoder.VideoEncoderConfig
 import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoder
+import com.android.grafika.videoencoder.muxer.MuxerVideoEncoder
 
 
 class GLCameraSurfacePreviewView  @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null
+        context: Context,
+        encoderType: EncoderType = EncoderType.MEDIA_RECORDER,
+        attrs: AttributeSet? = null
 ) : GLSurfaceView(context, attrs),
         GLPreviewView,
         CameraSurfaceCallback,
@@ -54,7 +57,10 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     override val surfaceProvider = RecordSurfaceProvider(this, previewTransform)
 
     private val encoderStateHandler = EncoderStateHandler(this)
-    private val videoEncoder = MediaRecorderEncoder(encoderStateHandler)
+    private val videoEncoder = when (encoderType) {
+        EncoderType.MUXER -> MuxerVideoEncoder(encoderStateHandler)
+        EncoderType.MEDIA_RECORDER -> MediaRecorderEncoder(encoderStateHandler)
+    }
     private val cameraHandler = CameraSurfaceHandler(this)
     private val renderer = CameraSurfaceRenderer(cameraHandler, videoEncoder)
 
@@ -178,4 +184,8 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         }
     }
 
+    enum class EncoderType {
+        MUXER,
+        MEDIA_RECORDER
+    }
 }

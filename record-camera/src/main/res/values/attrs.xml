@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="GLCameraView">
+        <attr name="encoderType" format="enum">
+            <enum name="muxer" value="0"/>
+            <enum name="media_recorder" value="1"/>
+        </attr>
         <attr name="videoPreferredWidth" format="integer"/>
         <attr name="videoPreferredHeight" format="integer"/>
         <attr name="videoBitRate" format="integer"/>

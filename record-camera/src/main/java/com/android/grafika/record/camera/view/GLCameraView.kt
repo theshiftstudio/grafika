@@ -15,7 +15,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.android.grafika.record.camera.GLCameraXModule
 import com.android.grafika.record.camera.R
 import com.android.grafika.videoencoder.VideoEncoderConfig
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_BIT_RATE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_ENCODER
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_SOURCE
 import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_FRAME_RATE
@@ -63,8 +62,9 @@ class GLCameraView @JvmOverloads constructor(
         set(value) { encoderConfig.audioEncoder { value } }
 
     private val cameraXModule = GLCameraXModule(this)
+    private lateinit var encoderType : GLCameraSurfacePreviewView.EncoderType
     private val previewView by lazy {
-        GLCameraSurfacePreviewView(context).apply {
+        GLCameraSurfacePreviewView(context, encoderType).apply {
             layoutParams = LayoutParams(videoPreferredWidth, videoPreferredHeight)
         }
     }
@@ -142,6 +142,13 @@ class GLCameraView @JvmOverloads constructor(
                             }
                         }
                     }
+            encoderType = array.getInt(R.styleable.GLCameraView_encoderType, 0).let {
+                when (it) {
+                    0 -> GLCameraSurfacePreviewView.EncoderType.MUXER
+                    1 -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
+                    else -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
+                }
+            }
             array.recycle()
         }
         this.addView(previewView, 0)
