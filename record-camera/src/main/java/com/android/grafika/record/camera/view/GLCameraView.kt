@@ -62,7 +62,7 @@ class GLCameraView @JvmOverloads constructor(
         set(value) { encoderConfig.audioEncoder { value } }
 
     private val cameraXModule = GLCameraXModule(this)
-    private lateinit var encoderType : GLCameraSurfacePreviewView.EncoderType
+    private lateinit var encoderType : EncoderType
     private val previewView by lazy {
         GLCameraSurfacePreviewView(context, encoderType).apply {
             layoutParams = LayoutParams(videoPreferredWidth, videoPreferredHeight)
@@ -142,11 +142,11 @@ class GLCameraView @JvmOverloads constructor(
                             }
                         }
                     }
-            encoderType = array.getInt(R.styleable.GLCameraView_encoderType, 0).let {
+            encoderType = array.getInt(R.styleable.GLCameraView_encoderType, EncoderType.MEDIA_RECORDER.attrId).let {
                 when (it) {
-                    0 -> GLCameraSurfacePreviewView.EncoderType.MUXER
-                    1 -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
-                    else -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
+                    EncoderType.MUXER.attrId -> EncoderType.MUXER
+                    EncoderType.MEDIA_RECORDER.attrId -> EncoderType.MEDIA_RECORDER
+                    else -> EncoderType.MEDIA_RECORDER
                 }
             }
             array.recycle()

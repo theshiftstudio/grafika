@@ -295,7 +295,7 @@ abstract class BaseVideoEncoder(
     /**
      * Handles a request to stop encoding.
      */
-    protected fun handleStopRecording() {
+    protected open fun handleStopRecording() {
         Log.d(TAG, "handleStopRecording")
         videoEncoder!!.stop()
         releaseEncoder()

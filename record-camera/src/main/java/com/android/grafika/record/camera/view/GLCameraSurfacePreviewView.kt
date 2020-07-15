@@ -184,8 +184,4 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         }
     }
 
-    enum class EncoderType {
-        MUXER,
-        MEDIA_RECORDER
-    }
 }
