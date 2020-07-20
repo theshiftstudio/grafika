@@ -99,7 +99,7 @@ abstract class BaseVideoEncoder(
                 return
             }
             running = true
-            Thread(this, "TextureMovieEncoder").start()
+            Thread(this, "BaseVideoEncoder").start()
             while (!ready) {
                 try {
                     condition.await()
