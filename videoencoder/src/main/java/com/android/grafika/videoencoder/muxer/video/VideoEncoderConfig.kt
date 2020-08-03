@@ -1,4 +1,4 @@
-package com.android.grafika.videoencoder
+package com.android.grafika.videoencoder.muxer.video
 
 import android.annotation.SuppressLint
 import android.media.MediaRecorder

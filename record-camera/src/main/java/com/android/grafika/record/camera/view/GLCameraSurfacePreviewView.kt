@@ -15,14 +15,15 @@ import com.android.grafika.record.camera.renderer.CameraSurfaceHandler
 import com.android.grafika.record.camera.renderer.CameraSurfaceRenderer
 import com.android.grafika.videoencoder.EncoderStateCallback
 import com.android.grafika.videoencoder.EncoderStateHandler
-import com.android.grafika.videoencoder.VideoEncoderConfig
-import com.android.grafika.videoencoder.mediarecorder.MediaRecorderEncoder
-import com.android.grafika.videoencoder.muxer.MuxerVideoEncoder
+import com.android.grafika.videoencoder.Recorder
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
+import com.android.grafika.videoencoder.mediarecorder.MediaVideoRecorder
+import com.android.grafika.videoencoder.muxer.MuxerRecorder
 
 
 class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         context: Context,
-        encoderType: EncoderType = EncoderType.MEDIA_RECORDER,
+        recorderType: RecorderType = RecorderType.MEDIA_RECORDER,
         attrs: AttributeSet? = null
 ) : GLSurfaceView(context, attrs),
         GLPreviewView,
@@ -57,15 +58,15 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     override val surfaceProvider = RecordSurfaceProvider(this, previewTransform)
 
     private val encoderStateHandler = EncoderStateHandler(this)
-    private val videoEncoder = when (encoderType) {
-        EncoderType.MUXER -> MuxerVideoEncoder(encoderStateHandler)
-        EncoderType.MEDIA_RECORDER -> MediaRecorderEncoder(encoderStateHandler)
+    private val videoRecorder = when (recorderType) {
+        RecorderType.MUXER_RECORDER -> MuxerRecorder(encoderStateHandler)
+        RecorderType.MEDIA_RECORDER -> MediaVideoRecorder()
     }
     private val cameraHandler = CameraSurfaceHandler(this)
-    private val renderer = CameraSurfaceRenderer(cameraHandler, videoEncoder)
+    private val renderer = CameraSurfaceRenderer(cameraHandler, videoRecorder)
 
     val isRecording
-        get() = videoEncoder.isRecording
+        get() = videoRecorder.isRecording
 
     override val surfaceTexture: SurfaceTexture?
         get() = renderer.surfaceTexture
@@ -138,7 +139,7 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     fun startRecording(encoderConfig: VideoEncoderConfig) {
         if (cameraAvailable) {
             queueEvent {
-                renderer.startRecording(encoderConfig)
+                videoRecorder.startRecording(encoderConfig)
             }
         } else {
             onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
@@ -170,7 +171,7 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
     fun stopRecording() {
         if (cameraAvailable) {
             queueEvent {
-                renderer.stopRecording()
+                videoRecorder.stopRecording()
             }
         } else {
             onRecordingFailed(Throwable("Please bindLifecycleOwner(LifecycleOwner) first!"))
@@ -184,8 +185,8 @@ class GLCameraSurfacePreviewView  @JvmOverloads constructor(
         }
     }
 
-    enum class EncoderType {
-        MUXER,
+    enum class RecorderType {
+        MUXER_RECORDER,
         MEDIA_RECORDER
     }
 }

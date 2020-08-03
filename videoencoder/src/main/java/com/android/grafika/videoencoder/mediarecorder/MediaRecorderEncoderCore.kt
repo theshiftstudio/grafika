@@ -9,7 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.util.Preconditions
 import com.android.grafika.videoencoder.EncoderCore
 import com.android.grafika.videoencoder.EncoderStateCallback
-import com.android.grafika.videoencoder.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
 import java.io.IOException
 import java.lang.IllegalStateException
 import java.lang.RuntimeException

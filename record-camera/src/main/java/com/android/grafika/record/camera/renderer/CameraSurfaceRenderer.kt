@@ -15,9 +15,8 @@ import com.android.grafika.core.Utils
 import com.android.grafika.core.gles.FullFrameRect
 import com.android.grafika.core.gles.Texture2dProgram
 import com.android.grafika.core.gles.Texture2dProgram.ProgramType
-import com.android.grafika.videoencoder.BaseVideoEncoder
-import com.android.grafika.videoencoder.VideoEncoderConfig
-import java.io.File
+import com.android.grafika.videoencoder.Recorder
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -29,8 +28,8 @@ import javax.microedition.khronos.opengles.GL10
  * GLSurfaceView#queueEvent() call.
  */
 class CameraSurfaceRenderer(
-        private val mCameraSurfaceHandler: CameraSurfaceHandler,
-        private val mVideoEncoder: BaseVideoEncoder
+        private val cameraSurfaceHandler: CameraSurfaceHandler,
+        private val recorder: Recorder
 ) : GLSurfaceView.Renderer {
 
     private var mEncoderConfig: VideoEncoderConfig? = null
@@ -189,7 +188,7 @@ class CameraSurfaceRenderer(
         Log.d(TAG, "onSurfaceCreated")
         when (mRecordingStatus) {
             RECORDING_NULL -> {
-                mRequestRecordingStatus = if (mVideoEncoder.isRecording) RECORDING_ON else RECORDING_NULL
+                mRequestRecordingStatus = if (recorder.isRecording) RECORDING_ON else RECORDING_NULL
                 mRecordingStatus = RECORDING_OFF
             }
             RECORDING_PAUSED -> mRequestRecordingStatus = RECORDING_RESUMED
@@ -207,7 +206,7 @@ class CameraSurfaceRenderer(
         surfaceTexture = SurfaceTexture(mTextureId)
 
         // Tell the UI thread to enable the camera preview.
-        mCameraSurfaceHandler.sendMessage(mCameraSurfaceHandler.obtainMessage(
+        cameraSurfaceHandler.sendMessage(cameraSurfaceHandler.obtainMessage(
                 CameraSurfaceHandler.MSG_SET_SURFACE_TEXTURE, surfaceTexture))
     }
 
@@ -235,11 +234,11 @@ class CameraSurfaceRenderer(
         // we just do it here.
         //
         // TODO: be less lame.
-        mVideoEncoder.updateTextureId(mTextureId)
+        recorder.updateTextureId(mTextureId)
 
         // Tell the video encoder thread that a new frame is available.
         // This will be ignored if we're not actually recording.
-        mVideoEncoder.frameAvailable(surfaceTexture!!)
+        recorder.frameAvailable(surfaceTexture!!)
         if (mIncomingWidth <= 0 || mIncomingHeight <= 0) {
             // Texture size isn't set yet.  This is only used for the filters, but to be
             // safe we can just skip drawing while we wait for the various races to resolve.
@@ -261,7 +260,7 @@ class CameraSurfaceRenderer(
         mFullScreen!!.drawFrame(mTextureId, mSTMatrix)
 
         // Draw a flashing box if we're recording.  This only appears on screen.
-        if (DEBUG && mVideoEncoder.isRecording && ++mFrameCount and 0x04 == 0) {
+        if (DEBUG && recorder.isRecording && ++mFrameCount and 0x04 == 0) {
             drawBox()
         }
     }
@@ -271,17 +270,17 @@ class CameraSurfaceRenderer(
             RECORDING_OFF -> {
                 Log.d(TAG, "START recording")
                 // start recording
-                mVideoEncoder.startRecording(mEncoderConfig)
+                recorder.startRecording(mEncoderConfig)
                 mRecordingStatus = RECORDING_ON
             }
             RECORDING_PAUSED -> {
                 Log.d(TAG, "RESUME recording")
-                mVideoEncoder.resumeRecording()
+                recorder.resumeRecording()
                 mRecordingStatus = RECORDING_ON
             }
             RECORDING_RESUMED -> {
                 Log.d(TAG, "RESUME recording")
-                mVideoEncoder.updateSharedContext(EGL14.eglGetCurrentContext())
+                recorder.updateSharedContext(EGL14.eglGetCurrentContext())
                 mRecordingStatus = RECORDING_ON
             }
             RECORDING_ON -> {
@@ -295,7 +294,7 @@ class CameraSurfaceRenderer(
             RECORDING_OFF -> throw IllegalStateException("Requesting to resume after stop! Start first")
             RECORDING_PAUSED -> {
                 Log.d(TAG, "RESUME recording")
-                mVideoEncoder.resumeRecording()
+                recorder.resumeRecording()
                 mRecordingStatus = RECORDING_ON
             }
             RECORDING_RESUMED -> {
@@ -311,9 +310,9 @@ class CameraSurfaceRenderer(
             RECORDING_OFF, RECORDING_PAUSED -> {
             }
             RECORDING_RESUMED, RECORDING_ON -> {
-                mVideoEncoder.pauseRecording()
+                recorder.pauseRecording()
                 mRecordingStatus = RECORDING_PAUSED
-                mCameraSurfaceHandler.sendMessage(mCameraSurfaceHandler.obtainMessage(CameraSurfaceHandler.MSG_PAUSE_SURFACE))
+                cameraSurfaceHandler.sendMessage(cameraSurfaceHandler.obtainMessage(CameraSurfaceHandler.MSG_PAUSE_SURFACE))
             }
             else -> throw RuntimeException("unknown status $mRecordingStatus")
         }
@@ -324,7 +323,7 @@ class CameraSurfaceRenderer(
             RECORDING_ON, RECORDING_RESUMED -> {
                 // stop recording
                 Log.d(TAG, "STOP recording")
-                mVideoEncoder.stopRecording()
+                recorder.stopRecording()
                 mRecordingStatus = RECORDING_OFF
             }
             RECORDING_PAUSED, RECORDING_OFF -> {

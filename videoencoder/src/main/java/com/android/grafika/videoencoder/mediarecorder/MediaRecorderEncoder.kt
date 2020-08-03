@@ -20,7 +20,8 @@ import android.util.Log
 import com.android.grafika.videoencoder.BaseVideoEncoder
 import com.android.grafika.videoencoder.EncoderCore
 import com.android.grafika.videoencoder.EncoderStateHandler
-import com.android.grafika.videoencoder.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderCore
 import java.io.IOException
 
 /**
@@ -51,28 +52,29 @@ import java.io.IOException
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-class MediaRecorderEncoder(
-        encoderStateHandler: EncoderStateHandler
-) : BaseVideoEncoder(encoderStateHandler), Runnable {
-
-    override fun handleFrameAvailable(transform: FloatArray, timestampNanos: Long) {
-        if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=$transform")
-        fullScreen?.drawFrame(textureId, transform)
-        if (VERBOSE) drawBox(frameNum++)
-        inputWindowSurface?.swapBuffers()
-    }
-
-    @Throws(IllegalStateException::class, IOException::class)
-    override fun createEncoder(config: VideoEncoderConfig): EncoderCore {
-        return config
-                .inputSurface { MediaCodec.createPersistentInputSurface() }
-                .preconditions()
-                .apply { MediaRecorderEncoderCore(this).apply {
-                    prepare()
-                    release()
-                }}
-                .let { MediaRecorderEncoderCore(it, this) }
-                .prepare()
-                .apply { start() }
-    }
-}
+//class MediaRecorderEncoder(
+//        encoderStateHandler: EncoderStateHandler
+//) : BaseVideoEncoder(encoderStateHandler), Runnable {
+//
+//    override fun handleFrameAvailable(transform: FloatArray, timestampNanos: Long) {
+//        if (VERBOSE) Log.d(TAG, "handleFrameAvailable tr=$transform")
+//        fullScreen?.drawFrame(textureId, transform)
+//        if (VERBOSE) drawBox(frameNum++)
+//        inputWindowSurface?.swapBuffers()
+//    }
+//
+//    @Throws(IllegalStateException::class, IOException::class)
+//    override fun createEncoderCore(config: VideoEncoderConfig): VideoEncoderCore {
+////        return config
+////                .inputSurface { MediaCodec.createPersistentInputSurface() }
+////                .preconditions()
+////                .apply { MediaRecorderEncoderCore(this).apply {
+////                    prepare()
+////                    release()
+////                }}
+////                .let { MediaRecorderEncoderCore(it, this) }
+////                .prepare()
+////                .apply { start() }
+//        return null
+//    }
+//}

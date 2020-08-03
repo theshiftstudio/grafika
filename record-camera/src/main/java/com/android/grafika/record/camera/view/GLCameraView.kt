@@ -14,14 +14,14 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.android.grafika.record.camera.GLCameraXModule
 import com.android.grafika.record.camera.R
-import com.android.grafika.videoencoder.VideoEncoderConfig
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_ENCODER
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_AUDIO_SOURCE
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_FRAME_RATE
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_BIT_RATE
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_HEIGHT
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.DEFAULT_VIDEO_WIDTH
-import com.android.grafika.videoencoder.VideoEncoderConfig.Companion.NULL_VALUE
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_AUDIO_ENCODER
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_AUDIO_SOURCE
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_FRAME_RATE
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_VIDEO_BIT_RATE
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_VIDEO_HEIGHT
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.DEFAULT_VIDEO_WIDTH
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig.Companion.NULL_VALUE
 import java.io.File
 
 
@@ -62,9 +62,9 @@ class GLCameraView @JvmOverloads constructor(
         set(value) { encoderConfig.audioEncoder { value } }
 
     private val cameraXModule = GLCameraXModule(this)
-    private lateinit var encoderType : GLCameraSurfacePreviewView.EncoderType
+    private lateinit var recorderType : GLCameraSurfacePreviewView.RecorderType
     private val previewView by lazy {
-        GLCameraSurfacePreviewView(context, encoderType).apply {
+        GLCameraSurfacePreviewView(context, recorderType).apply {
             layoutParams = LayoutParams(videoPreferredWidth, videoPreferredHeight)
         }
     }
@@ -142,11 +142,11 @@ class GLCameraView @JvmOverloads constructor(
                             }
                         }
                     }
-            encoderType = array.getInt(R.styleable.GLCameraView_encoderType, 0).let {
+            recorderType = array.getInt(R.styleable.GLCameraView_encoderType, 0).let {
                 when (it) {
-                    0 -> GLCameraSurfacePreviewView.EncoderType.MUXER
-                    1 -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
-                    else -> GLCameraSurfacePreviewView.EncoderType.MEDIA_RECORDER
+                    0 -> GLCameraSurfacePreviewView.RecorderType.MUXER_RECORDER
+                    1 -> GLCameraSurfacePreviewView.RecorderType.MEDIA_RECORDER
+                    else -> GLCameraSurfacePreviewView.RecorderType.MEDIA_RECORDER
                 }
             }
             array.recycle()

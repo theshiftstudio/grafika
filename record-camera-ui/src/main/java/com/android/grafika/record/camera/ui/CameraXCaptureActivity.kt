@@ -24,28 +24,23 @@ class CameraXCaptureActivity : AppCompatActivity() {
         setContentView(R.layout.activity_camera_x_capture)
         cameraView
                 .onRecordingStarted {
-                    record.isEnabled = true
                     record.text = "Stop"
                     Log.d(CameraXCaptureActivity::class.java.simpleName, "recording STARTED!")
                 }
                 .onRecordingPaused {
-                    record.isEnabled = true
                     record.text = "Paused"
                     Log.d(CameraXCaptureActivity::class.java.simpleName, "recording PAUSED!Start")
                 }
                 .onRecordingResumed {
-                    record.isEnabled = true
                     record.text = "Stop"
                     Log.d(CameraXCaptureActivity::class.java.simpleName, "recording RESUMED!")
                 }
                 .onRecordingStopped {
                     Log.d(CameraXCaptureActivity::class.java.simpleName, "recording STOPPED!")
                     record.text = "Rec"
-                    record.isEnabled = true
                 }
                 .onRecordingFailed {
                     record.text = "Rec"
-                    record.isEnabled = true
                     Log.e(CameraXCaptureActivity::class.java.simpleName, "recording FAILED!", it)
                 }
         flip.setOnClickListener {
@@ -53,7 +48,6 @@ class CameraXCaptureActivity : AppCompatActivity() {
         }
         record.setOnClickListener {
             cameraView.toggleRecording(outputFile)
-            record.isEnabled = false
         }
         power.setOnCheckedChangeListener { buttonView, isChecked ->
             powerOnCamera()
@@ -62,11 +56,9 @@ class CameraXCaptureActivity : AppCompatActivity() {
 
     private fun powerOnCamera() {
         if (power.isChecked) {
-            record.isEnabled = true
             flip.isEnabled = true
             cameraView.bindLifecycleOwner(this)
         } else {
-            record.isEnabled = false
             flip.isEnabled = false
             cameraView.unbindUseCases()
         }

@@ -21,7 +21,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.android.grafika.videoencoder.muxer.MuxerVideoEncoderCore;
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderCore;
 
 import java.lang.ref.WeakReference;
 
@@ -52,7 +52,7 @@ public class TextureMovieEncoder2 implements Runnable {
     private static final int MSG_FRAME_AVAILABLE = 2;
 
     // ----- accessed exclusively by encoder thread -----
-    private MuxerVideoEncoderCore mVideoEncoder;
+    private VideoEncoderCore mVideoEncoder;
 
     // ----- accessed by multiple threads -----
     private volatile EncoderHandler mHandler;
@@ -70,7 +70,7 @@ public class TextureMovieEncoder2 implements Runnable {
      * <p>
      * Returns after the recorder thread has started and is ready to accept Messages.
      */
-    public TextureMovieEncoder2(MuxerVideoEncoderCore encoderCore) {
+    public TextureMovieEncoder2(VideoEncoderCore encoderCore) {
         Log.d(TAG, "Encoder: startRecording()");
 
         mVideoEncoder = encoderCore;

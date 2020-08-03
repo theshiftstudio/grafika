@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.grafika.videoencoder.muxer
+package com.android.grafika.videoencoder.muxer.video
 
 import android.util.Log
 import com.android.grafika.videoencoder.BaseVideoEncoder
 import com.android.grafika.videoencoder.EncoderCore
 import com.android.grafika.videoencoder.EncoderStateHandler
-import com.android.grafika.videoencoder.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.BaseEncoderCore
+import com.android.grafika.videoencoder.muxer.Muxer
 import java.io.IOException
-import java.util.*
 
 /**
  * Encode a movie from frames rendered from an external texture image.
@@ -51,9 +51,11 @@ import java.util.*
  *
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
-class MuxerVideoEncoder(
-        encoderStateHandler: EncoderStateHandler
+class VideoEncoder(
+        private val muxer: Muxer,
+        override val encoderStateHandler: EncoderStateHandler
 ) : BaseVideoEncoder(encoderStateHandler) {
+
     override fun handleFrameAvailable(transform: FloatArray, timestampNanos: Long) {
         val verbose = VERBOSE
         if (verbose) Log.d(TAG, "handleFrameAvailable tr=" + transform.contentToString())
@@ -67,7 +69,7 @@ class MuxerVideoEncoder(
     }
 
     @Throws(IllegalStateException::class, IOException::class)
-    override fun createEncoder(config: VideoEncoderConfig): EncoderCore {
-        return MuxerVideoEncoderCore(config, this)
+    override fun createEncoderCore(config: VideoEncoderConfig): VideoEncoderCore {
+        return VideoEncoderCore(muxer, config)
     }
 }

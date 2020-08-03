@@ -43,8 +43,7 @@ import com.android.grafika.core.Utils;
 import com.android.grafika.record.camera.renderer.CameraSurfaceCallback;
 import com.android.grafika.record.camera.renderer.CameraSurfaceHandler;
 import com.android.grafika.record.camera.renderer.CameraSurfaceRenderer;
-import com.android.grafika.videoencoder.EncoderStateHandler;
-import com.android.grafika.videoencoder.muxer.MuxerVideoEncoder;
+import com.android.grafika.videoencoder.muxer.video.VideoEncoder;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,7 +137,8 @@ public class CameraCaptureActivity extends Activity
     private int mCameraPreviewWidth, mCameraPreviewHeight;
 
     // this is static so it survives activity restarts
-    private static MuxerVideoEncoder sVideoEncoder = new MuxerVideoEncoder(new EncoderStateHandler());
+    private static VideoEncoder sVideoEncoder = null ;
+//            new VideoEncoder(new EncoderStateHandler());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,7 +168,7 @@ public class CameraCaptureActivity extends Activity
         // appropriate EGL context.
         mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
         mGLView.setEGLContextClientVersion(2);     // select GLES 2.0
-        mRenderer = new CameraSurfaceRenderer(mCameraSurfaceHandler, sVideoEncoder);
+        mRenderer = new CameraSurfaceRenderer(mCameraSurfaceHandler, null);
         mGLView.setRenderer(mRenderer);
         mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 

@@ -27,6 +27,8 @@ import com.android.grafika.core.gles.EglCore
 import com.android.grafika.core.gles.FullFrameRect
 import com.android.grafika.core.gles.Texture2dProgram
 import com.android.grafika.core.gles.WindowSurface
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderConfig
+import com.android.grafika.videoencoder.muxer.video.VideoEncoderCore
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.util.concurrent.locks.ReentrantLock
@@ -61,14 +63,14 @@ import kotlin.concurrent.withLock
  * TODO: tweak the API (esp. textureId) so it's less awkward for simple use cases.
  */
 abstract class BaseVideoEncoder(
-        private val encoderStateHandler: EncoderStateHandler
+        protected open val encoderStateHandler: EncoderStateHandler
 ) : Runnable, EncoderStateCallback {
     // ----- accessed exclusively by encoder thread -----
     protected var inputWindowSurface: WindowSurface? = null
     protected var fullScreen: FullFrameRect? = null
     protected var textureId = 0
     protected var frameNum = 0
-    protected var videoEncoder: EncoderCore? = null
+    protected var videoEncoder: VideoEncoderCore? = null
 
     private var eglCore: EglCore? = null
 
@@ -81,6 +83,10 @@ abstract class BaseVideoEncoder(
     private val lock = ReentrantLock() // guards ready/running
     private val condition = lock.newCondition()
 
+    init {
+        startRecordingThread()
+    }
+
     /**
      * Tells the video recorder to start recording.  (Call from non-encoder thread.)
      *
@@ -92,6 +98,10 @@ abstract class BaseVideoEncoder(
      * encoder may not yet be fully configured.
      */
     fun startRecording(config: VideoEncoderConfig?) {
+        handler!!.sendMessage(handler!!.obtainMessage(MSG_START_RECORDING, config))
+    }
+
+    private fun startRecordingThread() {
         Log.d(TAG, "Encoder: startRecording()")
         lock.withLock {
             if (running) {
@@ -108,7 +118,6 @@ abstract class BaseVideoEncoder(
                 }
             }
         }
-        handler!!.sendMessage(handler!!.obtainMessage(MSG_START_RECORDING, config))
     }
 
     /**
@@ -169,15 +178,15 @@ abstract class BaseVideoEncoder(
      * before it calls updateTexImage().  The latter is preferred because we don't want to
      * stall the caller while this thread does work.
      */
-    fun frameAvailable(st: SurfaceTexture) {
+    fun frameAvailable(surfaceTexture: SurfaceTexture) {
         lock.withLock {
             if (!ready) {
                 return
             }
         }
         val transform = FloatArray(16) // TODO - avoid alloc every frame
-        st.getTransformMatrix(transform)
-        val timestamp = st.timestamp
+        surfaceTexture.getTransformMatrix(transform)
+        val timestamp = surfaceTexture.timestamp
         if (timestamp == 0L) {
             // Seeing this after device is toggled off/on with power button.  The
             // first frame back has a zero timestamp.
@@ -272,11 +281,11 @@ abstract class BaseVideoEncoder(
     }
 
     protected fun handleResumeRecording() {
-        if (videoEncoder!!.pauseResumeSupported) {
-            videoEncoder!!.resume()
-        } else {
-            stopRecording()
-        }
+//        if (videoEncoder!!.pauseResumeSupported) {
+//            videoEncoder!!.resume()
+//        } else {
+//            stopRecording()
+//        }
     }
 
     /**
@@ -296,17 +305,17 @@ abstract class BaseVideoEncoder(
      * Handles a request to stop encoding.
      */
     protected fun handleStopRecording() {
-        Log.d(TAG, "handleStopRecording")
-        videoEncoder!!.stop()
+//        Log.d(TAG, "handleStopRecording")
+//        videoEncoder!!.stop()
         releaseEncoder()
     }
 
     protected fun handlePauseRecording() {
-        if (videoEncoder!!.pauseResumeSupported) {
-            videoEncoder!!.pause()
-        } else {
-            stopRecording()
-        }
+//        if (videoEncoder!!.pauseResumeSupported) {
+//            videoEncoder!!.pause()
+//        } else {
+//            stopRecording()
+//        }
     }
 
     /**
@@ -344,10 +353,10 @@ abstract class BaseVideoEncoder(
     }
 
     @Throws(IllegalStateException::class, IOException::class)
-    protected abstract fun createEncoder(config: VideoEncoderConfig): EncoderCore
+    protected abstract fun createEncoderCore(config: VideoEncoderConfig): VideoEncoderCore
     private fun prepareEncoder(config: VideoEncoderConfig) {
         videoEncoder = try {
-            createEncoder(config)
+            createEncoderCore(config)
         } catch (e: IllegalStateException) {
             onRecordingFailed(e)
             throw RuntimeException(e)
@@ -380,8 +389,8 @@ abstract class BaseVideoEncoder(
     /**
      * Draws a box, with position offset.
      */
-    protected fun drawBox(posn: Int) {
-        val width = inputWindowSurface!!.width
+    protected fun drawBox(posn: Int) = inputWindowSurface?.let {
+        val width = it.width
         val xpos = posn * 4 % (width - 50)
         GLES20.glEnable(GLES20.GL_SCISSOR_TEST)
         GLES20.glScissor(xpos, 0, 100, 100)
