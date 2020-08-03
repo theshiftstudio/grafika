@@ -13,7 +13,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 
-class MediaVideoEncoder(
+open class MediaVideoEncoder(
         config: VideoEncoderConfig,
         private val pauseResumeSupported: Boolean,
         private val encoderStateCallback: EncoderStateCallback,
@@ -134,6 +134,8 @@ class MediaVideoEncoder(
                     // adjust the ByteBuffer values to match BufferInfo (not needed?)
                     encodedData.position(bufferInfo.offset)
                     encodedData.limit(bufferInfo.offset + bufferInfo.size)
+                    // write encoded data to muxer(need to adjust presentationTimeUs.
+                    bufferInfo.presentationTimeUs = getPTSUs()
                     muxerCallback.get()?.writeSampleData(trackIndex, encodedData, bufferInfo)
                     if (VERBOSE) {
                         Log.d(TAG, "sent " + bufferInfo.size + " bytes to muxer, ts=" +
@@ -179,6 +181,23 @@ class MediaVideoEncoder(
             encoder!!.setParameters(params)
             encoderStateCallback.onRecordingResumed()
         }
+    }
+
+    /**
+     * previous presentationTimeUs for writing
+     */
+    private val prevOutputPTSUs: Long = 0
+
+    /**
+     * get next encoding presentationTimeUs
+     * @return
+     */
+    private fun getPTSUs(): Long {
+        var result = System.nanoTime() / 1000L
+        // presentationTimeUs should be monotonic
+        // otherwise muxer fail to write
+        if (result < prevOutputPTSUs) result += prevOutputPTSUs - result
+        return result
     }
     
     companion object {

@@ -27,6 +27,7 @@ import com.android.grafika.videoencoder.VideoEncoderConfig
 import com.android.grafika.videoencoder.muxer.audio.MediaAudioEncoder
 import com.android.grafika.videoencoder.muxer.audio.MediaEncoder
 import com.android.grafika.videoencoder.muxer.video.MediaVideoEncoder
+import java.lang.Exception
 import java.nio.ByteBuffer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
@@ -133,7 +134,11 @@ class MuxerVideoEncoderCore(
 
     override fun writeSampleData(trackIndex: Int, byteBuffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
         synchronized(this) {
-            mediaMuxer?.writeSampleData(trackIndex, byteBuffer, bufferInfo)
+            try {
+                mediaMuxer?.writeSampleData(trackIndex, byteBuffer, bufferInfo)
+            } catch (e: Exception) {
+                Log.e(TAG, e.message)
+            }
         }
     }
 
