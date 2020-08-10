@@ -19,7 +19,7 @@ buildscript {
     ext {
         kotlin_version = '1.3.72'
         jitpackGrafikaGroupId = "com.github.theshiftstudio.grafika"
-        jitpackGrafikaVersion = "1.2.0-alpha02"
+        jitpackGrafikaVersion = "1.2.0-alpha03"
     }
     repositories {
         google()
