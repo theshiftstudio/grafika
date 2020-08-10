@@ -8,6 +8,7 @@ import android.hardware.camera2.CameraMetadata
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
+import androidx.camera.camera2.interop.Camera2CameraFilter
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
@@ -20,7 +21,6 @@ import com.android.grafika.record.camera.view.GLPreviewView
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-
 
 class GLCameraXModule(private val cameraView: View) {
 
@@ -37,21 +37,21 @@ class GLCameraXModule(private val cameraView: View) {
         Log.d(TAG, "Preview aspect ratio: $screenAspectRatio")
     }
 
-    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi", "UnsafeExperimentalUsageError")
     fun <T> bindToLifecycle(
             lifecycleOwner: LifecycleOwner,
             previewView: T,
             @CameraSelector.LensFacing lensFacing: Int = CameraSelector.LENS_FACING_FRONT
     ) where T: GLPreviewView, T: View = cameraView.post {
+        val rgbFilter = Camera2CameraFilter.createCameraFilter { idCharMap ->
+            idCharMap.filterTo(LinkedHashMap<String, CameraCharacteristics>()) {
+                it.value.supportsRgb()
+            }
+        }
         val cameraSelector = CameraSelector.Builder()
-                .appendFilter { cameras ->
-                    getFirstCameraIdFacing(cameraManager, lensFacing)?.let { cameraId ->
-                        cameras.filter {
-                            it.cameraInfoInternal.cameraId == cameraId
-                        }.toSet()
-                    } ?: LensFacingCameraFilter(lensFacing).filterCameras(cameras)
-                }
-                .build()
+            .addCameraFilter(rgbFilter)
+            .addCameraFilter(LensFacingCameraFilter(lensFacing))
+            .build()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
         cameraProviderFuture.addListener(Runnable {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
@@ -117,7 +117,6 @@ class GLCameraXModule(private val cameraView: View) {
         }
         return AspectRatio.RATIO_16_9
     }
-
 
     companion object {
         private val TAG by lazy { GLCameraView::class.java.simpleName }
