@@ -35,9 +35,8 @@ class MediaRecorderEncoderCore (
         mediaRecorder.setOutputFile(config.outputFile!!.absolutePath)
         mediaRecorder.setVideoEncodingBitRate(config.videoBitRate)
         mediaRecorder.setVideoFrameRate(config.frameRate)
-        if (config.audioBitRate != VideoEncoderConfig.NULL_VALUE) {
-            mediaRecorder.setAudioEncodingBitRate(config.audioBitRate)
-        }
+        mediaRecorder.setAudioEncodingBitRate(config.audioBitRate)
+        mediaRecorder.setAudioSamplingRate(config.audioSamplingRate)
         mediaRecorder.setVideoSize(config.width, config.height)
         mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
         mediaRecorder.setAudioEncoder(config.audioEncoder)

@@ -6,6 +6,7 @@
         <attr name="videoBitRate" format="integer"/>
         <attr name="videoFrameRate" format="integer"/>
         <attr name="audioBitRate" format="integer"/>
+        <attr name="audioSamplingRate" format="integer"/>
         <attr name="audioSource" format="enum">
             <!--"Default audio source"-->
             <enum name="default_value" value="0"/>

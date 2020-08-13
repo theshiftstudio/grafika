@@ -12,6 +12,8 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
 
     var videoBitRate: Int = config?.videoBitRate ?: 0
         private set
+    var audioSamplingRate: Int = config?.audioSamplingRate ?: 0
+        private set
     var audioBitRate: Int = config?.audioBitRate ?: 0
         private set
     var frameRate: Int = config?.frameRate ?: 0
@@ -40,6 +42,10 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
 
     fun videoBitRate(block: () -> Int) = apply {
         this.videoBitRate = block()
+    }
+
+    fun audioSamplingRate(block: () -> Int) = apply {
+        this.audioSamplingRate = block()
     }
 
     /**
@@ -78,8 +84,9 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
         Preconditions.checkArgument(width != 0, "width == 0")
         Preconditions.checkArgument(height != 0, "height == 0")
         Preconditions.checkArgument(frameRate > 0, "frameRate <= 0")
-        Preconditions.checkArgument(videoBitRate != 0, "height == 0")
-        Preconditions.checkArgument(audioBitRate != 0, "height == 0")
+        Preconditions.checkArgument(videoBitRate != 0, "videoBitRate == 0")
+        Preconditions.checkArgument(audioSamplingRate != 0, "audioSamplingRate == 0")
+        Preconditions.checkArgument(audioBitRate != 0, "audioBitRate == 0")
         Preconditions.checkArgument(audioSource != -1, "audioSource invalid:" +
                 "must be a value from `MediaRecorder.AudioSource`")
         Preconditions.checkArgument(audioEncoder != -1, "audioEncoder invalid:" +
@@ -88,9 +95,9 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
     }
 
     companion object {
-        const val NULL_VALUE = -1
         const val DEFAULT_VIDEO_BIT_RATE = 1080 * 1000 //1080kbps
         const val DEFAULT_AUDIO_BIT_RATE = 24 * 1000 //48kbps
+        const val DEFAULT_AUDIO_SAMPLING_RATE = 44100
         const val DEFAULT_FRAME_RATE = 30 //30FPS
         const val DEFAULT_VIDEO_WIDTH = 1080
         const val DEFAULT_VIDEO_HEIGHT = 1920
@@ -100,7 +107,8 @@ class VideoEncoderConfig(config: VideoEncoderConfig? = null) {
                 .width { DEFAULT_VIDEO_WIDTH }
                 .height { DEFAULT_VIDEO_HEIGHT }
                 .videoBitRate { DEFAULT_VIDEO_BIT_RATE }
-                .audioBitRate { NULL_VALUE }
+                .audioBitRate { DEFAULT_AUDIO_BIT_RATE }
+                .audioSamplingRate { DEFAULT_AUDIO_SAMPLING_RATE }
                 .frameRate { DEFAULT_FRAME_RATE }
                 .audioSource { DEFAULT_AUDIO_SOURCE }
                 .audioEncoder { DEFAULT_AUDIO_ENCODER }
