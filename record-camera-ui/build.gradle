@@ -36,6 +36,8 @@ android {
 dependencies {
     implementation project(":videoencoder")
     implementation project(":record-camera")
+    implementation project(":record-audio")
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

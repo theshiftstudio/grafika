@@ -53,7 +53,7 @@ class GLCameraXModule(private val cameraView: View) {
             .addCameraFilter(LensFacingCameraFilter(lensFacing))
             .build()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             // Preview
             val preview = Preview.Builder()

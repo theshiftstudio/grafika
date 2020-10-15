@@ -36,18 +36,11 @@ class RecordSurfaceProvider<T>(
             completer: CallbackToFutureAdapter.Completer<SurfaceRequest.Result?> ->
             request.provideSurface(surface!!,
                     Executors.newSingleThreadExecutor(),
-                    Consumer { value: SurfaceRequest.Result? -> completer.set(value) }
+                    { value: SurfaceRequest.Result? -> completer.set(value) }
             )
             ("provideSurface[request=$request surface=$surface]")
         }
         this.surfaceReleaseFuture = surfaceReleaseFuture
-        this.surfaceReleaseFuture?.addListener(Runnable {
-            surface?.release()
-            surface = null
-            if (this.surfaceReleaseFuture === surfaceReleaseFuture) {
-                this.surfaceReleaseFuture = null
-            }
-        }, ContextCompat.getMainExecutor(previewView.context))
     }
 
 }

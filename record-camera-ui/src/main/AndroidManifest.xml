@@ -2,6 +2,9 @@
     package="com.android.grafika.record.camera.ui">
     <application>
         <activity
+            android:name="AudioCaptureActivity"
+            android:label="@string/title_activity_camera_capture"/>
+        <activity
             android:name="CameraXCaptureActivity"
             android:label="@string/title_activity_camera_capture"/>
         <activity

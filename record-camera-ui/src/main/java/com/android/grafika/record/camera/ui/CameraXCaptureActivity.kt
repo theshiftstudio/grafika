@@ -55,7 +55,7 @@ class CameraXCaptureActivity : AppCompatActivity() {
             cameraView.toggleRecording(outputFile)
             record.isEnabled = false
         }
-        power.setOnCheckedChangeListener { buttonView, isChecked ->
+        power.setOnCheckedChangeListener { _, _ ->
             powerOnCamera()
         }
     }
