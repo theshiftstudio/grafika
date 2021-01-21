@@ -9,10 +9,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import androidx.camera.camera2.interop.Camera2CameraFilter
+import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
-import androidx.camera.core.impl.LensFacingCameraFilter
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
@@ -39,29 +39,27 @@ class GLCameraXModule(private val cameraView: View) {
 
     @SuppressLint("RestrictedApi", "UnsafeExperimentalUsageError")
     fun <T> bindToLifecycle(
-            lifecycleOwner: LifecycleOwner,
-            previewView: T,
-            @CameraSelector.LensFacing lensFacing: Int = CameraSelector.LENS_FACING_FRONT
-    ) where T: GLPreviewView, T: View = cameraView.post {
-        val rgbFilter = Camera2CameraFilter.createCameraFilter { idCharMap ->
-            idCharMap.filterTo(LinkedHashMap<String, CameraCharacteristics>()) {
-                it.value.supportsRgb()
-            }
+        lifecycleOwner: LifecycleOwner,
+        previewView: T,
+        @CameraSelector.LensFacing lensFacing: Int = CameraSelector.LENS_FACING_FRONT
+    ) where T : GLPreviewView, T : View = cameraView.post {
+        val rgbFilter = Camera2CameraFilter.createCameraFilter { cameraInfos ->
+            cameraInfos.filterTo(ArrayList()) { it.supportsRgb() }
         }
         val cameraSelector = CameraSelector.Builder()
+            .requireLensFacing(lensFacing)
             .addCameraFilter(rgbFilter)
-            .addCameraFilter(LensFacingCameraFilter(lensFacing))
             .build()
         val cameraProviderFuture = ProcessCameraProvider.getInstance(cameraView.context)
         cameraProviderFuture.addListener({
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
             // Preview
             val preview = Preview.Builder()
-                    // We request aspect ratio but no resolution
-                    .setTargetAspectRatio(screenAspectRatio)
-                    // Set initial target rotation
-                    .setTargetRotation(cameraView.display.rotation)
-                    .build()
+                // We request aspect ratio but no resolution
+                .setTargetAspectRatio(screenAspectRatio)
+                // Set initial target rotation
+                .setTargetRotation(cameraView.display.rotation)
+                .build()
 
             // Must unbind the use-cases before rebinding them
             cameraProvider.unbindAll()
@@ -72,32 +70,10 @@ class GLCameraXModule(private val cameraView: View) {
                 cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
                 // Attach the viewfinder's surface provider to preview use case
                 preview.setSurfaceProvider(previewView.surfaceProvider)
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
         }, ContextCompat.getMainExecutor(cameraView.context))
-    }
-
-    private fun getFirstCameraIdFacing(
-            cameraManager: CameraManager,
-            facing: Int = CameraSelector.LENS_FACING_FRONT
-    ): String? {
-        // Get list of all compatible cameras
-        val cameraIds = cameraManager.cameraIdList.filter {
-            cameraManager.getCameraCharacteristics(it).supportsRgb()
-        }
-
-        val metadataFacing = when (facing) {
-            CameraSelector.LENS_FACING_FRONT -> CameraMetadata.LENS_FACING_FRONT
-            CameraSelector.LENS_FACING_BACK -> CameraMetadata.LENS_FACING_BACK
-            else -> CameraMetadata.LENS_FACING_FRONT
-        }
-        // Iterate over the list of cameras and return the first one matching desired
-        // lens-facing configuration
-        return cameraIds.firstOrNull {
-            cameraManager.getCameraCharacteristics(it)[CameraCharacteristics.LENS_FACING] == metadataFacing
-        }
-        // If no camera matched desired orientation, return the first one from the list
     }
 
     fun unbindUseCases(block: () -> Unit) {
@@ -125,7 +101,8 @@ class GLCameraXModule(private val cameraView: View) {
     }
 }
 
-fun CameraCharacteristics.supportsRgb() : Boolean =
-        this[CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES]
-                ?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)
-                ?: false
+@SuppressLint("UnsafeExperimentalUsageError")
+fun Camera2CameraInfo.supportsRgb(): Boolean =
+    getCameraCharacteristic(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
+        ?.contains(CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)
+        ?: false
