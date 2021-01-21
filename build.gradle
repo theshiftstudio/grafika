@@ -17,7 +17,7 @@
  */
 buildscript {
     ext {
-        kotlin_version = '1.4.10'
+        kotlin_version = '1.4.21'
         jitpackGrafikaGroupId = "com.github.theshiftstudio.grafika"
         jitpackGrafikaVersion = "1.1.0"
     }
